@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// AUTH & USERS
+// ============================================================
+
+enum Role {
+  STARTUP
+  INVESTOR
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  passwordHash   String   @map("password_hash")
+  role           Role
+  fullName       String   @map("full_name")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  startup        Startup?
+  investor       Investor?
+
+  sentMessages     Message[]      @relation("SentMessages")
+  chatMembers      ChatMember[]
+  auditLogs        AuditLog[]
+  eventRegistrations EventRegistration[]
+
+  @@map("users")
+}
+
+// ============================================================
+// STARTUP
+// ============================================================
+
+enum StartupStage {
+  IDEA
+  PRE_SEED
+  SEED
+  ROUND_A
+}
+
+model Startup {
+  id              String       @id @default(cuid())
+  userId          String       @unique @map("user_id")
+  name            String
+  sector          String
+  stage           StartupStage @default(PRE_SEED)
+  description     String?
+  investmentNeeded BigInt?     @map("investment_needed") // в копейках
+  arrAmount       BigInt?      @map("arr_amount")        // в копейках
+  monthsOnMarket  Int?         @map("months_on_market")
+  usersCount      Int?         @map("users_count")
+  rating          Float?       @default(0)
+  tags            String[]     @default([])
+  isActive        Boolean      @default(true) @map("is_active")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  user            User         @relation(fields: [userId], references: [id])
+  tariffId        String?      @map("tariff_id")
+  tariff          Tariff?      @relation(fields: [tariffId], references: [id])
+  teamMembers     TeamMember[]
+  documents       Document[]
+  deals           Deal[]
+  ndaAgreements   NdaAgreement[]
+  documentViews   DocumentView[]
+
+  @@map("startups")
+}
+
+model TeamMember {
+  id        String  @id @default(cuid())
+  startupId String  @map("startup_id")
+  fullName  String  @map("full_name")
+  role      String  // CEO, CTO, etc.
+  startup   Startup @relation(fields: [startupId], references: [id])
+
+  @@map("team_members")
+}
+
+// ============================================================
+// INVESTOR
+// ============================================================
+
+model Investor {
+  id                 String             @id @default(cuid())
+  userId             String             @unique @map("user_id")
+  companyName        String?            @map("company_name")    // ИП / ООО name
+  ogrn               String?                                     // ОГРНИП / ОГРН
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  verifiedAt         DateTime?          @map("verified_at")
+  sectorFocus        String[]           @default([]) @map("sector_focus")
+  checkMin           BigInt?            @map("check_min")        // в копейках
+  checkMax           BigInt?            @map("check_max")        // в копейках
+  preferredStages    StartupStage[]     @default([]) @map("preferred_stages")
+  region             String?
+  rating             Float?             @default(0)
+  totalInvested      BigInt             @default(0) @map("total_invested") // в копейках
+  isActive           Boolean            @default(true) @map("is_active")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  user               User               @relation(fields: [userId], references: [id])
+  verificationDocs   VerificationDoc[]
+  deals              Deal[]
+  ndaAgreements      NdaAgreement[]
+  documentViews      DocumentView[]
+
+  @@map("investors")
+}
+
+model VerificationDoc {
+  id         String   @id @default(cuid())
+  investorId String   @map("investor_id")
+  fileName   String   @map("file_name")
+  fileUrl    String   @map("file_url")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  investor   Investor @relation(fields: [investorId], references: [id])
+
+  @@map("verification_docs")
+}
+
+// ============================================================
+// TARIFFS
+// ============================================================
+
+model Tariff {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  priceMonthly BigInt  @map("price_monthly") // в копейках (0 = бесплатно)
+  features    String[]
+  isFeatured  Boolean  @default(false) @map("is_featured")
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  startups    Startup[]
+
+  @@map("tariffs")
+}
+
+// ============================================================
+// DOCUMENTS & NDA
+// ============================================================
+
+model Document {
+  id            String   @id @default(cuid())
+  startupId     String   @map("startup_id")
+  fileName      String   @map("file_name")
+  fileUrl       String   @map("file_url")
+  fileSizeMb    Float?   @map("file_size_mb")
+  accessLevel   String   @default("public") @map("access_level") // public, nda, premium
+  isActive      Boolean  @default(true) @map("is_active")
+  uploadedAt    DateTime @default(now()) @map("uploaded_at")
+
+  startup       Startup       @relation(fields: [startupId], references: [id])
+  views         DocumentView[]
+
+  @@map("documents")
+}
+
+model NdaAgreement {
+  id         String   @id @default(cuid())
+  investorId String   @map("investor_id")
+  startupId  String   @map("startup_id")
+  signedAt   DateTime @default(now()) @map("signed_at")
+  ipAddress  String?  @map("ip_address")
+
+  investor   Investor @relation(fields: [investorId], references: [id])
+  startup    Startup  @relation(fields: [startupId], references: [id])
+
+  @@unique([investorId, startupId])
+  @@map("nda_agreements")
+}
+
+model DocumentView {
+  id         String   @id @default(cuid())
+  documentId String   @map("document_id")
+  investorId String   @map("investor_id")
+  startupId  String   @map("startup_id")
+  viewedAt   DateTime @default(now()) @map("viewed_at")
+  durationSec Int?    @map("duration_sec")
+  ipAddress  String?  @map("ip_address")
+
+  document   Document @relation(fields: [documentId], references: [id])
+  investor   Investor @relation(fields: [investorId], references: [id])
+  startup    Startup  @relation(fields: [startupId], references: [id])
+
+  @@map("document_views")
+}
+
+// ============================================================
+// DEALS
+// ============================================================
+
+enum DealStatus {
+  INITIATED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Deal {
+  id              String     @id @default(cuid())
+  investorId      String     @map("investor_id")
+  startupId       String     @map("startup_id")
+  amount          BigInt                              // в копейках
+  commissionRate  Float      @default(0.08) @map("commission_rate")
+  commissionAmount BigInt    @map("commission_amount") // в копейках
+  totalAmount     BigInt     @map("total_amount")      // в копейках
+  status          DealStatus @default(INITIATED)
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  investor        Investor   @relation(fields: [investorId], references: [id])
+  startup         Startup    @relation(fields: [startupId], references: [id])
+
+  @@map("deals")
+}
+
+// ============================================================
+// CHAT
+// ============================================================
+
+model Chat {
+  id        String       @id @default(cuid())
+  isGroup   Boolean      @default(false) @map("is_group")
+  name      String?
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  members   ChatMember[]
+  messages  Message[]
+
+  @@map("chats")
+}
+
+model ChatMember {
+  id        String   @id @default(cuid())
+  chatId    String   @map("chat_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
+  @@map("chat_members")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String   @map("chat_id")
+  senderId  String   @map("sender_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+
+model Event {
+  id           String   @id @default(cuid())
+  title        String
+  type         String              // Питч-сессия, Вебинар, Мастер-класс
+  emoji        String   @default("📅")
+  description  String?
+  dateTime     DateTime @map("date_time")
+  participants Int      @default(0)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  registrations EventRegistration[]
+
+  @@map("events")
+}
+
+model EventRegistration {
+  id        String   @id @default(cuid())
+  eventId   String   @map("event_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+  @@map("event_registrations")
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  action    String
+  entity    String?
+  entityId  String?  @map("entity_id")
+  meta      Json?
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

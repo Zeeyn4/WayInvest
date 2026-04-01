@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WayInvest — Инвестиционная платформа Чечни</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C96A;
+  --gold-dark: #9A7A2A;
+  --black: #0A0A0A;
+  --dark: #111318;
+  --dark2: #1A1E26;
+  --dark3: #222836;
+  --border: rgba(201,168,76,0.2);
+  --text: #E8E4DC;
+  --text-dim: #8A8680;
+  --green: #2ECC71;
+  --red: #E74C3C;
+  --blue: #3498DB;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Jost',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--dark);}
+::-webkit-scrollbar-thumb{background:var(--gold-dark);border-radius:3px;}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;animation:fadeIn .4s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.active{display:flex;}
+.modal{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:40px;width:90%;max-width:540px;position:relative;max-height:90vh;overflow-y:auto;}
+.modal h2{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:24px;font-size:1.6rem;}
+.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--text-dim);font-size:1.4rem;cursor:pointer;transition:.2s;}
+.modal-close:hover{color:var(--gold);}
+
+/* BUTTONS — fully Mac/Safari/Chrome safe */
+button,input[type="button"],input[type="submit"]{-webkit-appearance:none;appearance:none;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:8px;border:2px solid transparent;cursor:pointer;font-family:'Jost',sans-serif;font-size:.95rem;font-weight:600;transition:all .25s;text-decoration:none;-webkit-appearance:none;appearance:none;line-height:1.3;white-space:nowrap;}
+.btn-gold{background-color:#B8942A !important;background-image:linear-gradient(135deg,#D4A832,#8C6818) !important;color:#0A0A0A !important;-webkit-text-fill-color:#0A0A0A !important;border-color:transparent !important;}
+.btn-gold:hover{background-color:#C9A84C !important;background-image:linear-gradient(135deg,#E8C96A,#C9A84C) !important;transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.35);}
+.btn-outline{background-color:#1A1E26 !important;background-image:none !important;color:#C9A84C !important;-webkit-text-fill-color:#C9A84C !important;border:2px solid #C9A84C !important;}
+.btn-outline:hover{background-color:#222836 !important;}
+.btn-outline:disabled,button:disabled{opacity:.45 !important;cursor:default !important;transform:none !important;}
+.btn-ghost{background-color:#222836 !important;background-image:none !important;color:#9A9690 !important;-webkit-text-fill-color:#9A9690 !important;border:1px solid rgba(201,168,76,.3) !important;}
+.btn-ghost:hover{color:#E8E4DC !important;-webkit-text-fill-color:#E8E4DC !important;border-color:#8A8680 !important;}
+.btn-sm{padding:8px 18px !important;font-size:.84rem !important;}
+.btn-danger{background-color:#2A1010 !important;background-image:none !important;color:#E74C3C !important;-webkit-text-fill-color:#E74C3C !important;border:1px solid rgba(231,76,60,.5) !important;}
+.btn-danger:hover{background-color:#3A1818 !important;}
+
+/* INPUTS */
+.form-group{margin-bottom:20px;}
+.form-group label{display:block;color:#8A8680;font-size:.85rem;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:#222836;border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:12px 16px;color:#E8E4DC !important;-webkit-text-fill-color:#E8E4DC !important;font-family:'Jost',sans-serif;font-size:.95rem;transition:.2s;outline:none;-webkit-appearance:none;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.1);}
+.form-group textarea{resize:vertical;min-height:100px;}
+.form-group select option{background:#1A1E26;color:#E8E4DC;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--dark3);border-radius:10px;padding:4px;margin-bottom:28px;}
+.tab{flex:1;padding:10px;text-align:center;border-radius:7px;cursor:pointer;font-size:.9rem;color:var(--text-dim);transition:.2s;border:none;background:none;font-family:'Jost',sans-serif;}
+.tab.active{background:var(--dark2);color:var(--gold);border:1px solid var(--border);}
+
+/* CARDS */
+.card{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:28px;transition:.25s;}
+.card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-2px);}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;letter-spacing:.5px;}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
+.badge-green{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3);}
+.badge-red{background:rgba(231,76,60,.15);color:var(--red);border:1px solid rgba(231,76,60,.3);}
+.badge-blue{background:rgba(52,152,219,.15);color:var(--blue);border:1px solid rgba(52,152,219,.3);}
+
+/* STAT */
+.stat-box{background:var(--dark3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
+.stat-box .num{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);font-weight:700;}
+.stat-box .lbl{color:var(--text-dim);font-size:.8rem;margin-top:4px;}
+
+/* NOTIFICATION */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--dark2);border:1px solid var(--gold);border-radius:10px;padding:14px 20px;z-index:9999;display:flex;align-items:center;gap:12px;max-width:340px;transform:translateX(120%);transition:.35s cubic-bezier(.34,1.56,.64,1);}
+.toast.show{transform:translateX(0);}
+.toast-icon{font-size:1.2rem;}
+.toast-msg{font-size:.9rem;}
+
+/* LANDING */
+#landing .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;padding:40px 20px;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(201,168,76,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 20% 80%,rgba(201,168,76,.04) 0%,transparent 50%);}
+.hero-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-badge{background:rgba(201,168,76,.1);border:1px solid var(--border);border-radius:20px;padding:6px 18px;font-size:.8rem;color:var(--gold);margin-bottom:28px;display:inline-block;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:900;line-height:1.1;margin-bottom:24px;}
+.hero h1 span{color:var(--gold);}
+.hero p{color:var(--text-dim);font-size:1.1rem;max-width:580px;line-height:1.7;margin-bottom:44px;}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+.floating-card{position:absolute;background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;font-size:.8rem;backdrop-filter:blur(10px);}
+.fc1{top:18%;left:5%;animation:float 6s ease-in-out infinite;}
+.fc2{top:22%;right:5%;animation:float 6s ease-in-out infinite .8s;}
+.fc3{bottom:22%;left:8%;animation:float 6s ease-in-out infinite 1.6s;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;background:rgba(10,10,10,.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);cursor:pointer;}
+.nav-logo span{color:var(--text);}
+.nav-links{display:flex;align-items:center;gap:28px;}
+.nav-link{color:var(--text-dim);text-decoration:none;font-size:.9rem;cursor:pointer;transition:.2s;}
+.nav-link:hover{color:var(--gold);}
+.nav-actions{display:flex;gap:12px;align-items:center;}
+
+/* DASHBOARD LAYOUT */
+.dash-layout{display:flex;min-height:100vh;}
+.sidebar{width:260px;background:var(--dark2);border-right:1px solid var(--border);padding:24px 0;position:fixed;top:0;bottom:0;left:0;overflow-y:auto;z-index:50;}
+.sidebar-logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);padding:0 24px 24px;border-bottom:1px solid var(--border);cursor:pointer;}
+.sidebar-logo span{color:var(--text);}
+.sidebar-section{padding:20px 24px 8px;color:var(--text-dim);font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:11px 24px;cursor:pointer;transition:.2s;color:var(--text-dim);font-size:.9rem;border-left:3px solid transparent;}
+.sidebar-item:hover{color:var(--text);background:rgba(255,255,255,.03);}
+.sidebar-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.06);}
+.sidebar-item .icon{font-size:1.1rem;width:20px;text-align:center;}
+.dash-main{margin-left:260px;flex:1;padding:32px;min-height:100vh;}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+.dash-header h1{font-family:'Playfair Display',serif;font-size:1.8rem;}
+.dash-user{display:flex;align-items:center;gap:12px;}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-weight:700;color:#0A0A0A;font-size:.9rem;}
+.notif-btn{position:relative;background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;color:var(--text-dim);transition:.2s;font-size:1rem;}
+.notif-btn:hover{color:var(--gold);}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--gold);border-radius:50%;}
+
+/* SECTION PANELS */
+.dash-panel{display:none;}
+.dash-panel.active{display:block;animation:fadeIn .3s ease;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+
+/* STARTUP CARD */
+.startup-card{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:24px;transition:.25s;cursor:pointer;}
+.startup-card:hover{border-color:rgba(201,168,76,.5);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.4);}
+.sc-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;}
+.sc-logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--gold-dark),var(--dark3));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.sc-info h3{font-size:1rem;margin-bottom:4px;}
+.sc-info p{color:var(--text-dim);font-size:.8rem;}
+.sc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.sc-tag{background:var(--dark3);border:1px solid var(--border);border-radius:4px;padding:3px 10px;font-size:.75rem;color:var(--text-dim);}
+.sc-metrics{display:flex;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);}
+.sc-metric{text-align:center;}
+.sc-metric .val{font-weight:600;color:var(--gold);font-size:.95rem;}
+.sc-metric .key{color:var(--text-dim);font-size:.72rem;}
+
+/* CHAT */
+.chat-layout{display:flex;height:calc(100vh - 130px);gap:0;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.chat-list{width:280px;background:var(--dark2);border-right:1px solid var(--border);overflow-y:auto;}
+.chat-list-header{padding:18px 20px;border-bottom:1px solid var(--border);font-weight:600;}
+.chat-item{padding:14px 20px;cursor:pointer;transition:.15s;border-bottom:1px solid rgba(255,255,255,.04);}
+.chat-item:hover{background:rgba(255,255,255,.03);}
+.chat-item.active{background:rgba(201,168,76,.08);border-left:3px solid var(--gold);}
+.chat-item-name{font-size:.9rem;margin-bottom:3px;}
+.chat-item-preview{color:var(--text-dim);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-item-time{color:var(--text-dim);font-size:.72rem;float:right;margin-top:-18px;}
+.chat-main{flex:1;display:flex;flex-direction:column;background:var(--dark);}
+.chat-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--dark2);}
+.chat-messages{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:12px;}
+.msg{max-width:65%;display:flex;flex-direction:column;gap:4px;}
+.msg.mine{align-self:flex-end;align-items:flex-end;}
+.msg.theirs{align-self:flex-start;}
+.msg-bubble{padding:12px 16px;border-radius:12px;font-size:.9rem;line-height:1.5;}
+.msg.mine .msg-bubble{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:#0A0A0A;border-bottom-right-radius:3px;}
+.msg.theirs .msg-bubble{background:var(--dark2);border:1px solid var(--border);border-bottom-left-radius:3px;}
+.msg-time{color:var(--text-dim);font-size:.72rem;padding:0 4px;}
+.chat-input-area{padding:16px 24px;border-top:1px solid var(--border);background:var(--dark2);display:flex;gap:10px;}
+.chat-input{flex:1;background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'Jost',sans-serif;font-size:.9rem;outline:none;resize:none;}
+.chat-input:focus{border-color:var(--gold);}
+.chat-send{background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:10px;padding:12px 20px;cursor:pointer;color:#0A0A0A;font-size:1rem;transition:.2s;}
+.chat-send:hover{opacity:.9;transform:scale(1.03);}
+
+/* EVENTS */
+.event-card{background:var(--dark2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:.25s;}
+.event-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-2px);}
+.event-banner{height:130px;background:linear-gradient(135deg,var(--dark3),var(--dark2));display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;overflow:hidden;}
+.event-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.1),transparent);}
+.event-body{padding:20px;}
+.event-date{color:var(--gold);font-size:.8rem;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.event-title{font-size:1rem;font-weight:600;margin-bottom:8px;}
+.event-desc{color:var(--text-dim);font-size:.83rem;line-height:1.5;margin-bottom:16px;}
+.event-footer{display:flex;align-items:center;justify-content:space-between;}
+.event-participants{color:var(--text-dim);font-size:.8rem;}
+
+/* PROGRESS */
+.progress-bar{background:var(--dark3);border-radius:4px;height:8px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold));border-radius:4px;transition:width .6s ease;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{text-align:left;color:var(--text-dim);font-size:.78rem;letter-spacing:.5px;text-transform:uppercase;padding:12px 16px;border-bottom:1px solid var(--border);}
+.data-table td{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.88rem;vertical-align:middle;}
+.data-table tr:hover td{background:rgba(255,255,255,.02);}
+
+/* PACKAGES */
+.pkg-card{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:32px 28px;position:relative;transition:.3s;cursor:pointer;}
+.pkg-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.5);}
+.pkg-card.featured{border-color:var(--gold);background:linear-gradient(180deg,rgba(201,168,76,.08),var(--dark2));}
+.pkg-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#0A0A0A;font-size:.72rem;font-weight:700;padding:5px 16px;border-radius:20px;letter-spacing:1px;white-space:nowrap;}
+.pkg-name{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);margin-bottom:6px;}
+.pkg-price{font-size:2rem;font-weight:700;margin:16px 0 8px;}
+.pkg-price span{font-size:1rem;color:var(--text-dim);}
+.pkg-features{list-style:none;margin:20px 0 28px;}
+.pkg-features li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88rem;color:var(--text-dim);display:flex;align-items:center;gap:8px;}
+.pkg-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;}
+.pkg-features li.no::before{content:'✗';color:var(--text-dim);}
+.pkg-features li.no{opacity:.5;}
+
+/* PROFILE */
+.profile-header{background:linear-gradient(180deg,rgba(201,168,76,.08),transparent);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:28px;display:flex;gap:24px;align-items:flex-start;}
+.profile-avatar{width:80px;height:80px;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;}
+.profile-info h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:6px;}
+.profile-info p{color:var(--text-dim);font-size:.9rem;line-height:1.6;}
+.profile-stats{display:flex;gap:32px;margin-top:20px;}
+.pstat{text-align:center;}
+.pstat .n{font-size:1.3rem;font-weight:700;color:var(--gold);}
+.pstat .l{color:var(--text-dim);font-size:.75rem;}
+
+/* VERIFY BANNER */
+.verify-banner{background:linear-gradient(135deg,rgba(231,76,60,.1),rgba(231,76,60,.05));border:1px solid rgba(231,76,60,.3);border-radius:12px;padding:18px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.verify-banner .icon{font-size:1.5rem;}
+.verify-banner p{font-size:.9rem;line-height:1.5;}
+.verify-banner strong{color:var(--red);}
+
+/* NDA OVERLAY */
+.nda-overlay{background:rgba(10,10,10,.95);border:1px solid var(--gold);border-radius:14px;padding:32px;text-align:center;}
+.nda-icon{font-size:3rem;margin-bottom:16px;}
+.nda-overlay h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:12px;}
+.nda-overlay p{color:var(--text-dim);font-size:.9rem;line-height:1.6;margin-bottom:24px;}
+
+/* SEARCH */
+.search-bar{display:flex;gap:10px;margin-bottom:24px;}
+.search-input{flex:1;background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;color:var(--text);font-family:'Jost',sans-serif;font-size:.95rem;outline:none;transition:.2s;}
+.search-input:focus{border-color:var(--gold);}
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
+.filter-btn{background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:7px 16px;color:var(--text-dim);font-size:.82rem;cursor:pointer;transition:.2s;}
+.filter-btn:hover,.filter-btn.active{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold);}
+
+/* ADMIN */
+.admin-stat{background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:20px 24px;display:flex;align-items:center;gap:16px;}
+.admin-stat-icon{width:48px;height:48px;border-radius:10px;background:rgba(201,168,76,.1);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
+.admin-stat-info .val{font-size:1.6rem;font-weight:700;font-family:'Playfair Display',serif;}
+.admin-stat-info .lbl{color:var(--text-dim);font-size:.8rem;}
+
+/* LANDING SECTIONS */
+.section{padding:80px 40px;max-width:1200px;margin:0 auto;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:12px;}
+.section-sub{color:var(--text-dim);font-size:1rem;margin-bottom:48px;max-width:560px;line-height:1.7;}
+.divider{width:60px;height:3px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px;margin:16px 0 40px;}
+.feature-card{background:var(--dark2);border:1px solid var(--border);border-radius:14px;padding:28px;transition:.25s;}
+.feature-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-3px);}
+.feature-icon{font-size:2rem;margin-bottom:16px;}
+.feature-card h3{font-size:1.1rem;margin-bottom:8px;}
+.feature-card p{color:var(--text-dim);font-size:.88rem;line-height:1.6;}
+
+/* FOOTER */
+footer{background:var(--dark2);border-top:1px solid var(--border);padding:48px 40px 24px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 40px;}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);margin-bottom:14px;}
+.footer-logo span{color:var(--text);}
+.footer-desc{color:var(--text-dim);font-size:.87rem;line-height:1.6;}
+.footer-col h4{font-size:.85rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.footer-col a{display:block;color:var(--text-dim);font-size:.87rem;margin-bottom:8px;text-decoration:none;cursor:pointer;transition:.2s;}
+.footer-col a:hover{color:var(--text);}
+.footer-bottom{text-align:center;color:var(--text-dim);font-size:.8rem;padding-top:24px;border-top:1px solid var(--border);max-width:1200px;margin:0 auto;}
+.commission-notice{background:rgba(201,168,76,.08);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:.85rem;color:var(--text-dim);}
+.commission-notice strong{color:var(--gold);}
+
+/* AI MATCH */
+.ai-match-card{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.02));border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;align-items:center;gap:20px;margin-bottom:16px;transition:.2s;cursor:pointer;}
+.ai-match-card:hover{border-color:rgba(201,168,76,.5);}
+.match-score{width:56px;height:56px;border-radius:50%;background:conic-gradient(var(--gold) calc(var(--pct)*3.6deg),var(--dark3) 0);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:var(--gold);flex-shrink:0;position:relative;}
+.match-score::before{content:'';position:absolute;inset:5px;background:var(--dark2);border-radius:50%;}
+.match-score span{position:relative;z-index:1;}
+.match-info{flex:1;}
+.match-info h4{margin-bottom:4px;}
+.match-info p{color:var(--text-dim);font-size:.82rem;}
+.match-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+
+/* WATERMARK */
+.watermarked{position:relative;overflow:hidden;}
+.watermark-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:900;color:rgba(201,168,76,.08);letter-spacing:8px;transform:rotate(-20deg);pointer-events:none;user-select:none;font-family:'Playfair Display',serif;white-space:nowrap;}
+
+/* RESPONSIVE HELPERS */
+.flex-between{display:flex;align-items:center;justify-content:space-between;}
+.flex-gap{display:flex;align-items:center;gap:12px;}
+.mt-8{margin-top:8px;}
+.mt-16{margin-top:16px;}
+.mt-24{margin-top:24px;}
+.mt-32{margin-top:32px;}
+.text-gold{color:var(--gold);}
+.text-dim{color:var(--text-dim);}
+.text-green{color:var(--green);}
+.text-red{color:var(--red);}
+.fw-600{font-weight:600;}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✓</span>
+  <span class="toast-msg" id="toast-msg"></span>
+</div>
+
+<!-- ===== LANDING ===== -->
+<div id="landing" class="screen active">
+  <nav class="nav">
+    <div class="nav-logo" onclick="showScreen('landing')">Way<span>Invest</span></div>
+    <div class="nav-links">
+      <a class="nav-link" onclick="scrollToSection('about')">О платформе</a>
+      <a class="nav-link" onclick="scrollToSection('packages')">Тарифы</a>
+      <a class="nav-link" onclick="scrollToSection('how')">Как это работает</a>
+      <a class="nav-link" onclick="scrollToSection('safety')">Безопасность</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')">Войти</button>
+      <button class="btn btn-gold btn-sm" onclick="openModal('registerModal')">Регистрация</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-lines"></div>
+    <div class="floating-card fc1">🚀 <strong style="color:var(--gold)">42</strong> активных стартапа</div>
+    <div class="floating-card fc2">💼 <strong style="color:var(--gold)">18</strong> верифицированных инвесторов</div>
+    <div class="floating-card fc3">🤝 <strong style="color:var(--gold)">₽ 280М+</strong> привлечено</div>
+    <div class="hero-badge">🇷🇺 Инвестиционная платформа Чечни</div>
+    <h1>Первая инвест-платформа<br>для <span>чеченского</span> рынка</h1>
+    <p>WayInvest соединяет перспективные стартапы с верифицированными инвесторами. Безопасные сделки, AI-подбор партнёров, защита от мошенничества.</p>
+    <div class="hero-btns">
+      <button class="btn btn-gold" onclick="openModal('registerModal')" style="font-size:1rem;padding:14px 36px;">Разместить стартап</button>
+      <button class="btn btn-outline" onclick="openModal('registerModal')" style="font-size:1rem;padding:14px 36px;">Я инвестор →</button>
+    </div>
+    <div style="margin-top:60px;display:flex;gap:48px;flex-wrap:wrap;justify-content:center;">
+      <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);font-weight:700;">8%</div><div style="color:var(--text-dim);font-size:.8rem;">Комиссия платформы</div></div>
+      <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);font-weight:700;">0₽</div><div style="color:var(--text-dim);font-size:.8rem;">Размещение стартапа</div></div>
+      <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);font-weight:700;">NDA</div><div style="color:var(--text-dim);font-size:.8rem;">Защита идей</div></div>
+      <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);font-weight:700;">AI</div><div style="color:var(--text-dim);font-size:.8rem;">Умный подбор</div></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <div id="about" style="background:var(--dark2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="section">
+      <div class="section-title">Как работает WayInvest</div>
+      <div class="divider"></div>
+      <div class="grid-3">
+        <div class="feature-card"><div class="feature-icon">📋</div><h3>Регистрация и верификация</h3><p>Стартапы регистрируются бесплатно. Инвесторы проходят обязательную проверку документов ИП или юрлица — только после этого они могут инвестировать.</p></div>
+        <div class="feature-card"><div class="feature-icon">🤖</div><h3>AI-подбор партнёров</h3><p>Интеллектуальный алгоритм анализирует профили участников и предлагает наиболее релевантные совпадения по отрасли, сумме и стадии развития.</p></div>
+        <div class="feature-card"><div class="feature-icon">🔒</div><h3>Безопасная сделка</h3><p>Все инвестиции проходят через платформу. Комиссия 8% фиксирована. Любые обходные договорённости являются нарушением соглашения и ведут к блокировке.</p></div>
+        <div class="feature-card"><div class="feature-icon">💬</div><h3>Встроенные коммуникации</h3><p>Личные чаты, групповые каналы, онлайн-питч-сессии — все переговоры ведутся внутри платформы с полным логированием действий.</p></div>
+        <div class="feature-card"><div class="feature-icon">📄</div><h3>Автоматическое NDA</h3><p>Перед просмотром деталей стартапа инвестор подписывает соглашение о неразглашении. Презентации защищены водяными знаками.</p></div>
+        <div class="feature-card"><div class="feature-icon">📅</div><h3>Мероприятия и питч-сессии</h3><p>Регулярные онлайн-события: вебинары, мастер-классы и питч-сессии для стартапов и инвесторов с возможностью записи через профиль.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PACKAGES -->
+  <div id="packages">
+    <div class="section">
+      <div class="section-title">Тарифы для стартапов</div>
+      <div class="section-sub">Размещение на платформе бесплатно. Дополнительные пакеты помогают стартапам привлечь внимание инвесторов быстрее.</div>
+      <div class="commission-notice">⚠️ <strong>Важно:</strong> При совершении инвестиционной сделки через WayInvest с суммы инвестиций удерживается комиссия платформы <strong>8%</strong>. Данный размер комиссии является фиксированным, закреплён в Пользовательском соглашении и не может быть изменён или оспорен ни инвестором, ни стартапом.</div>
+      <div class="grid-4" style="align-items:start;">
+        <div class="pkg-card" onclick="openModal('pkgModal');setPkg('free')">
+          <div class="pkg-name">Базовый</div>
+          <div class="pkg-price">0₽<span>/мес</span></div>
+          <ul class="pkg-features">
+            <li>Профиль стартапа</li>
+            <li>Базовое описание проекта</li>
+            <li>Доступ к каталогу инвесторов</li>
+            <li>Получение откликов</li>
+            <li class="no">Приоритет в поиске</li>
+            <li class="no">Расширенная аналитика</li>
+            <li class="no">AI-подбор инвесторов</li>
+            <li class="no">Консультации и NDA</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%">Начать бесплатно</button>
+        </div>
+        <div class="pkg-card" onclick="openModal('pkgModal');setPkg('start')">
+          <div class="pkg-name">Стартовый</div>
+          <div class="pkg-price">4 900₽<span>/мес</span></div>
+          <ul class="pkg-features">
+            <li>Всё из Базового</li>
+            <li>Приоритет в поиске</li>
+            <li>Расширенная аналитика просмотров</li>
+            <li>AI-подбор инвесторов</li>
+            <li>Статистика интереса</li>
+            <li class="no">Индивидуальная консультация</li>
+            <li class="no">Помощь с документами</li>
+            <li class="no">Усиленная защита NDA</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%">Выбрать</button>
+        </div>
+        <div class="pkg-card featured" onclick="openModal('pkgModal');setPkg('premium')">
+          <div class="pkg-badge">ПОПУЛЯРНЫЙ</div>
+          <div class="pkg-name">Премиум</div>
+          <div class="pkg-price">12 900₽<span>/мес</span></div>
+          <ul class="pkg-features">
+            <li>Всё из Стартового</li>
+            <li>Индивидуальная консультация</li>
+            <li>Помощь в оформлении документов</li>
+            <li>NDA + водяные знаки</li>
+            <li>Ограниченный доступ к файлам</li>
+            <li>Высший приоритет AI-подбора</li>
+          </ul>
+          <button class="btn btn-gold" style="width:100%">Выбрать Премиум</button>
+        </div>
+        <div class="pkg-card" onclick="openModal('pkgModal');setPkg('elite')">
+          <div class="pkg-name">Элит</div>
+          <div class="pkg-price">29 900₽<span>/мес</span></div>
+          <ul class="pkg-features">
+            <li>Всё из Премиум</li>
+            <li>Персональный менеджер</li>
+            <li>Участие в закрытых питч-сессиях</li>
+            <li>Featured-размещение на главной</li>
+            <li>Прямой выход на топ-инвесторов</li>
+            <li>Юридическое сопровождение сделки</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%">Выбрать Элит</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAFETY -->
+  <div id="safety" style="background:var(--dark2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="section">
+      <div class="section-title">Безопасность и защита</div>
+      <div class="divider"></div>
+      <div class="grid-2">
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <h3 style="color:var(--gold);margin-bottom:10px;">🔐 Верификация инвесторов</h3>
+            <p style="color:var(--text-dim);font-size:.88rem;line-height:1.6;">Каждый инвестор обязан предоставить документы ИП или юридического лица. До прохождения проверки администратором — <strong style="color:var(--text)">нет доступа к стартапам, нет возможности писать или инвестировать</strong>.</p>
+          </div>
+          <div class="card" style="margin-bottom:16px;">
+            <h3 style="color:var(--gold);margin-bottom:10px;">📝 Автоматическое NDA</h3>
+            <p style="color:var(--text-dim);font-size:.88rem;line-height:1.6;">Перед просмотром детальных материалов стартапа инвестор подтверждает соглашение о неразглашении. Все просмотры логируются с указанием IP и времени.</p>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--gold);margin-bottom:10px;">🚫 Запрет обходных сделок</h3>
+            <p style="color:var(--text-dim);font-size:.88rem;line-height:1.6;">Сделки вне платформы запрещены. Попытка обойти комиссию 8% является нарушением соглашения и ведёт к немедленной <strong style="color:var(--red)">блокировке профиля</strong>.</p>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <h3 style="color:var(--gold);margin-bottom:10px;">💧 Защита презентаций</h3>
+            <p style="color:var(--text-dim);font-size:.88rem;line-height:1.6;">Все загружённые материалы стартапа отображаются с персональными водяными знаками. Скачивание в полном виде невозможно до стадии глубокой сделки.</p>
+          </div>
+          <div class="card" style="margin-bottom:16px;">
+            <h3 style="color:var(--gold);margin-bottom:10px;">📊 Журнал действий</h3>
+            <p style="color:var(--text-dim);font-size:.88rem;line-height:1.6;">Стартап видит полный список инвесторов, которые просматривали его материалы: кто, когда, сколько времени провёл на каждом разделе.</p>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--gold);margin-bottom:10px;">🏦 Фиксированная комиссия 8%</h3>
+            <p style="color:var(--text-dim);font-size:.88rem;line-height:1.6;">Комиссия платформы закреплена в Пользовательском соглашении. Её размер не подлежит обсуждению или изменению. Инвестор уведомляется об этом при регистрации.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW -->
+  <div id="how">
+    <div class="section">
+      <div class="section-title">Для стартапов и инвесторов</div>
+      <div class="divider"></div>
+      <div class="grid-2" style="gap:40px;">
+        <div>
+          <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:20px;">🚀 Если вы стартап</h3>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">1</div><div><strong>Зарегистрируйтесь бесплатно</strong><br><span style="color:var(--text-dim);font-size:.85rem;">Создайте профиль команды и проекта. Загрузите питч-дек и финансовые показатели.</span></div></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">2</div><div><strong>Получайте отклики от инвесторов</strong><br><span style="color:var(--text-dim);font-size:.85rem;">AI-алгоритм подбирает релевантных инвесторов под ваш профиль и запросы.</span></div></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">3</div><div><strong>Ведите переговоры в чате</strong><br><span style="color:var(--text-dim);font-size:.85rem;">Все коммуникации — внутри платформы. История переписки защищена и документируется.</span></div></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">4</div><div><strong>Закройте сделку через WayInvest</strong><br><span style="color:var(--text-dim);font-size:.85rem;">Инвестиция проходит через платформу. Сделка официально зафиксирована и защищена.</span></div></div>
+          </div>
+          <div style="margin-top:24px;"><button class="btn btn-gold" onclick="openModal('registerModal')">Разместить стартап →</button></div>
+        </div>
+        <div>
+          <h3 style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:20px;">💼 Если вы инвестор</h3>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">1</div><div><strong>Пройдите верификацию</strong><br><span style="color:var(--text-dim);font-size:.85rem;">Загрузите документы ИП или юрлица. Администратор проверит данные в течение 1–2 рабочих дней.</span></div></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">2</div><div><strong>Заполните инвестиционный профиль</strong><br><span style="color:var(--text-dim);font-size:.85rem;">Укажите отраслевые интересы, инвестиционный чек, стадии и регион поиска.</span></div></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">3</div><div><strong>Изучайте стартапы через AI</strong><br><span style="color:var(--text-dim);font-size:.85rem;">Получайте персональные рекомендации. Просматривайте материалы под защитой NDA.</span></div></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0;font-weight:700;">4</div><div><strong>Инвестируйте через платформу</strong><br><span style="color:var(--text-dim);font-size:.85rem;">Комиссия 8% удерживается платформой автоматически при проведении сделки через WayInvest.</span></div></div>
+          </div>
+          <div style="margin-top:24px;"><button class="btn btn-outline" onclick="openModal('registerModal')">Стать инвестором →</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Way<span>Invest</span></div>
+        <p class="footer-desc">Первая инвестиционная платформа Чечни. Безопасные сделки между стартапами и верифицированными инвесторами.</p>
+        <div style="margin-top:16px;color:var(--text-dim);font-size:.8rem;">📍 Грозный, Чеченская Республика</div>
+      </div>
+      <div class="footer-col">
+        <h4>Платформа</h4>
+        <a onclick="openModal('registerModal')">Разместить стартап</a>
+        <a onclick="openModal('registerModal')">Стать инвестором</a>
+        <a onclick="openModal('loginModal')">Мероприятия</a>
+        <a onclick="openModal('loginModal')">Каталог стартапов</a>
+      </div>
+      <div class="footer-col">
+        <h4>Компания</h4>
+        <a onclick="openModal('termsModal')">Правила сервиса</a>
+        <a onclick="openModal('termsModal')">Пользовательское соглашение</a>
+        <a onclick="openModal('termsModal')">Политика конфиденциальности</a>
+        <a onclick="openModal('termsModal')">Комиссия и оплата</a>
+      </div>
+      <div class="footer-col">
+        <h4>Поддержка</h4>
+        <a><span class="__cf_email__" data-cfemail="26555356564954526651475f4f4850435552085453">[email&#160;protected]</span></a>
+        <a>+7 (928) 000-00-00</a>
+        <a>Telegram-чат</a>
+        <a>FAQ</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2024 WayInvest. Все права защищены. Комиссия платформы 8% фиксирована и не подлежит изменению.</div>
+  </footer>
+</div>
+
+<!-- ===== STARTUP DASHBOARD ===== -->
+<div id="startupDash" class="screen">
+  <div class="dash-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo" onclick="showScreen('landing')">Way<span>Invest</span></div>
+      <div class="sidebar-section">Основное</div>
+      <div class="sidebar-item active" onclick="showPanel('startup','dashboard')"><span class="icon">🏠</span>Дашборд</div>
+      <div class="sidebar-item" onclick="showPanel('startup','profile')"><span class="icon">👤</span>Мой профиль</div>
+      <div class="sidebar-item" onclick="showPanel('startup','project')"><span class="icon">🚀</span>Мой проект</div>
+      <div class="sidebar-section">Инвесторы</div>
+      <div class="sidebar-item" onclick="showPanel('startup','aiMatch')"><span class="icon">🤖</span>AI-подбор</div>
+      <div class="sidebar-item" onclick="showPanel('startup','catalog')"><span class="icon">📋</span>Каталог инвесторов</div>
+      <div class="sidebar-section">Коммуникации</div>
+      <div class="sidebar-item" onclick="showPanel('startup','chat')"><span class="icon">💬</span>Чаты</div>
+      <div class="sidebar-item" onclick="showPanel('startup','events')"><span class="icon">📅</span>Мероприятия</div>
+      <div class="sidebar-section">Настройки</div>
+      <div class="sidebar-item" onclick="showPanel('startup','tariff')"><span class="icon">💳</span>Тариф</div>
+      <div class="sidebar-item" onclick="showPanel('startup','docs')"><span class="icon">📄</span>Документы</div>
+      <div style="padding:24px;margin-top:auto;"><button class="btn btn-ghost btn-sm" style="width:100%" onclick="showScreen('landing')">← Выйти</button></div>
+    </div>
+    <div class="dash-main">
+      <div class="dash-header">
+        <h1 id="startupPanelTitle">Дашборд</h1>
+        <div class="dash-user">
+          <button class="notif-btn" onclick="showToast('У вас 3 новых отклика от инвесторов!','🔔')">🔔<span class="notif-dot"></span></button>
+          <div class="avatar">АМ</div>
+          <span style="font-size:.9rem;">Алихан Мусаев</span>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="startup-dashboard" class="dash-panel active">
+        <div class="verify-banner" style="background:rgba(46,204,113,.08);border-color:rgba(46,204,113,.3);">
+          <span class="icon">✅</span>
+          <p>Ваш профиль активен. Тариф: <strong style="color:var(--green)">Стартовый</strong>. Следующее списание: 15 января 2025.</p>
+        </div>
+        <div class="grid-4" style="margin-bottom:28px;">
+          <div class="stat-box"><div class="num">247</div><div class="lbl">Просмотров профиля</div></div>
+          <div class="stat-box"><div class="num">18</div><div class="lbl">Откликов инвесторов</div></div>
+          <div class="stat-box"><div class="num">5</div><div class="lbl">Активных переговоров</div></div>
+          <div class="stat-box"><div class="num">82%</div><div class="lbl">AI-совпадение</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="flex-between" style="margin-bottom:16px;"><h3>Интерес инвесторов</h3><span class="badge badge-green">+24% за неделю</span></div>
+            <div style="margin-bottom:12px;"><div class="flex-between" style="font-size:.85rem;margin-bottom:6px;"><span>Технологии</span><span class="text-gold">68%</span></div><div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div></div>
+            <div style="margin-bottom:12px;"><div class="flex-between" style="font-size:.85rem;margin-bottom:6px;"><span>Розница</span><span class="text-gold">45%</span></div><div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div></div>
+            <div><div class="flex-between" style="font-size:.85rem;margin-bottom:6px;"><span>Логистика</span><span class="text-gold">22%</span></div><div class="progress-bar"><div class="progress-fill" style="width:22%"></div></div></div>
+          </div>
+          <div class="card">
+            <div class="flex-between" style="margin-bottom:16px;"><h3>Последние отклики</h3><button class="btn btn-ghost btn-sm" onclick="showPanel('startup','chat')">Все чаты →</button></div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--dark3);border-radius:8px;cursor:pointer;" onclick="showPanel('startup','chat')"><div class="avatar" style="width:32px;height:32px;font-size:.75rem;">РБ</div><div><div style="font-size:.88rem;">Рустам Бекмурзаев</div><div style="color:var(--text-dim);font-size:.78rem;">Интересен раунд A...</div></div><span class="badge badge-green" style="margin-left:auto;font-size:.7rem;">Новый</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--dark3);border-radius:8px;cursor:pointer;" onclick="showPanel('startup','chat')"><div class="avatar" style="width:32px;height:32px;font-size:.75rem;">МА</div><div><div style="font-size:.88rem;">Магомед Ахматов</div><div style="color:var(--text-dim);font-size:.78rem;">Пришлите финансовую...</div></div></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--dark3);border-radius:8px;cursor:pointer;" onclick="showPanel('startup','chat')"><div class="avatar" style="width:32px;height:32px;font-size:.75rem;">ЗА</div><div><div style="font-size:.88rem;">Зулай Алиева</div><div style="color:var(--text-dim);font-size:.78rem;">Когда следующий питч?</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="startup-profile" class="dash-panel">
+        <div class="profile-header">
+          <div class="profile-avatar">🚀</div>
+          <div style="flex:1;">
+            <div class="flex-between">
+              <h2>ТехЧечня — маркетплейс локальных услуг</h2>
+              <span class="badge badge-green">Активен</span>
+            </div>
+            <p>Онлайн-платформа для поиска и заказа локальных услуг в Грозном и регионе. Стадия: Pre-seed. Ищем ₽5–15 млн инвестиций.</p>
+            <div class="profile-stats">
+              <div class="pstat"><div class="n">38</div><div class="l">месяц на рынке</div></div>
+              <div class="pstat"><div class="n">1,200</div><div class="l">пользователей</div></div>
+              <div class="pstat"><div class="n">₽4.2М</div><div class="l">ARR</div></div>
+              <div class="pstat"><div class="n">4.8⭐</div><div class="l">рейтинг платформы</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:20px;">Редактировать профиль</h3>
+            <div class="form-group"><label>Название стартапа</label><input value="ТехЧечня"></div>
+            <div class="form-group"><label>Отрасль</label><select><option>IT / Технологии</option><option>Ритейл / Маркетплейс</option><option>Финтех</option><option>Агротех</option><option>Логистика</option></select></div>
+            <div class="form-group"><label>Стадия</label><select><option>Идея</option><option selected>Pre-seed</option><option>Seed</option><option>Раунд A</option></select></div>
+            <div class="form-group"><label>Потребность в инвестициях (₽)</label><input value="10 000 000"></div>
+            <div class="form-group"><label>Описание продукта</label><textarea>Маркетплейс локальных услуг (ремонт, уборка, репетиторство) для Грозного и республики. 1,200 активных пользователей, 200 исполнителей.</textarea></div>
+            <button class="btn btn-gold" onclick="showToast('Профиль сохранён','✅')">Сохранить изменения</button>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <h3 style="margin-bottom:16px;">Команда</h3>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;"><div class="avatar">АМ</div><div><div style="font-size:.9rem;font-weight:600;">Алихан Мусаев</div><div style="color:var(--text-dim);font-size:.8rem;">CEO, сооснователь</div></div></div>
+                <div style="display:flex;align-items:center;gap:12px;"><div class="avatar" style="background:linear-gradient(135deg,#3498DB,#2C3E50);">ЛА</div><div><div style="font-size:.9rem;font-weight:600;">Лейла Абдулаева</div><div style="color:var(--text-dim);font-size:.8rem;">CTO, сооснователь</div></div></div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:14px;" onclick="showToast('Функция добавления участника команды','👥')">+ Добавить участника</button>
+            </div>
+            <div class="card">
+              <h3 style="margin-bottom:16px;">Тег-облако навыков</h3>
+              <div class="sc-tags">
+                <span class="sc-tag">IT</span><span class="sc-tag">Маркетплейс</span><span class="sc-tag">B2C</span><span class="sc-tag">Грозный</span><span class="sc-tag">Mobile-first</span><span class="sc-tag">Pre-seed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECT MATERIALS -->
+      <div id="startup-project" class="dash-panel">
+        <div class="grid-2" style="margin-bottom:24px;">
+          <div class="card">
+            <h3 style="margin-bottom:16px;">Загруженные материалы</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--dark3);border-radius:8px;">
+                <span style="font-size:1.3rem;">📊</span>
+                <div style="flex:1;"><div style="font-size:.88rem;">PitchDeck_ТехЧечня_2024.pdf</div><div style="color:var(--text-dim);font-size:.75rem;">18 слайдов • 4.2 МБ</div></div>
+                <span class="badge badge-green">Активен</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--dark3);border-radius:8px;">
+                <span style="font-size:1.3rem;">📈</span>
+                <div style="flex:1;"><div style="font-size:.88rem;">Финансовая_модель_2025.xlsx</div><div style="color:var(--text-dim);font-size:.75rem;">Только для Премиум-инвесторов</div></div>
+                <span class="badge badge-gold">Защищён</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--dark3);border-radius:8px;">
+                <span style="font-size:1.3rem;">📋</span>
+                <div style="flex:1;"><div style="font-size:.88rem;">Устав_компании.pdf</div><div style="color:var(--text-dim);font-size:.75rem;">Только после NDA</div></div>
+                <span class="badge badge-blue">NDA</span>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm" style="margin-top:16px;" onclick="showToast('Форма загрузки файла открыта','📎')">+ Загрузить материал</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:16px;">Журнал просмотров</h3>
+            <div style="color:var(--text-dim);font-size:.82rem;margin-bottom:12px;">Все просмотры ваших материалов инвесторами логируются</div>
+            <table class="data-table" style="font-size:.82rem;">
+              <tr><th>Инвестор</th><th>Документ</th><th>Время</th></tr>
+              <tr><td>Рустам Б.</td><td>PitchDeck</td><td>14 мин</td></tr>
+              <tr><td>Магомед А.</td><td>PitchDeck</td><td>8 мин</td></tr>
+              <tr><td>Зулай А.</td><td>Фин. модель</td><td><span class="badge badge-red" style="font-size:.7rem;">Запрос</span></td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="nda-overlay">
+          <div class="nda-icon">🛡️</div>
+          <h3>Защита материалов стартапа</h3>
+          <p>Ваши презентации защищены персональными водяными знаками. Скачивание полных файлов недоступно для инвесторов до стадии углублённой сделки. Все просмотры фиксируются в журнале.</p>
+          <button class="btn btn-gold" onclick="showToast('Настройки доступа обновлены','🔒')">Настроить уровни доступа</button>
+        </div>
+      </div>
+
+      <!-- AI MATCH -->
+      <div id="startup-aiMatch" class="dash-panel">
+        <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),var(--dark2));border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><span style="font-size:1.5rem;">🤖</span><h2 style="font-family:'Playfair Display',serif;">AI-подбор инвесторов</h2></div>
+          <p style="color:var(--text-dim);font-size:.9rem;">Алгоритм анализирует параметры вашего проекта и предлагает наиболее релевантных инвесторов по отрасли, чеку и стадии.</p>
+          <button class="btn btn-gold btn-sm" style="margin-top:14px;" onclick="showToast('AI-анализ обновлён. Найдено 12 новых совпадений!','🤖')">Обновить подбор</button>
+        </div>
+        <h3 style="margin-bottom:16px;">Рекомендуемые инвесторы</h3>
+        <div id="aiInvestorList"></div>
+      </div>
+
+      <!-- CATALOG -->
+      <div id="startup-catalog" class="dash-panel">
+        <div class="search-bar"><input class="search-input" placeholder="Поиск инвесторов по имени, отрасли, чеку..."><button class="btn btn-gold">Найти</button></div>
+        <div class="filter-row">
+          <button class="filter-btn active">Все</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">IT / Технологии</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Ритейл</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Финтех</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Pre-seed</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Seed</button>
+        </div>
+        <div id="investorCatalog"></div>
+      </div>
+
+      <!-- CHAT -->
+      <div id="startup-chat" class="dash-panel">
+        <div class="chat-layout">
+          <div class="chat-list">
+            <div class="chat-list-header">Сообщения</div>
+            <div class="chat-item active" onclick="selectChat(this,'Рустам Бекмурзаев')"><div class="chat-item-name">Рустам Бекмурзаев</div><div class="chat-item-preview">Интересен раунд A</div><span class="chat-item-time">14:22</span></div>
+            <div class="chat-item" onclick="selectChat(this,'Магомед Ахматов')"><div class="chat-item-name">Магомед Ахматов</div><div class="chat-item-preview">Пришлите финансовую модель</div><span class="chat-item-time">Вчера</span></div>
+            <div class="chat-item" onclick="selectChat(this,'Зулай Алиева')"><div class="chat-item-name">Зулай Алиева</div><div class="chat-item-preview">Когда следующий питч-день?</div><span class="chat-item-time">Пн</span></div>
+            <div class="chat-item" onclick="selectChat(this,'Группа: IT Стартапы ЧР')"><div class="chat-item-name" style="color:var(--gold);">👥 IT Стартапы ЧР</div><div class="chat-item-preview">Аминат: Жду всех на вебинаре</div><span class="chat-item-time">10:05</span></div>
+          </div>
+          <div class="chat-main">
+            <div class="chat-header"><div class="avatar" style="width:36px;height:36px;font-size:.8rem;">РБ</div><div><div style="font-weight:600;" id="chatPartner">Рустам Бекмурзаев</div><div style="color:var(--green);font-size:.78rem;">● Верифицированный инвестор</div></div></div>
+            <div class="chat-messages" id="chatMessages">
+              <div class="msg theirs"><div class="msg-bubble">Добрый день! Ознакомился с вашим питч-деком. Очень интересная концепция для локального рынка.</div><div class="msg-time">14:18</div></div>
+              <div class="msg mine"><div class="msg-bubble">Спасибо большое! Рады вашему интересу. Чем могу быть полезен?</div><div class="msg-time">14:20</div></div>
+              <div class="msg theirs"><div class="msg-bubble">Меня интересует раунд A. Каков ваш текущий ARR и планы на масштабирование?</div><div class="msg-time">14:22</div></div>
+            </div>
+            <div class="chat-input-area"><textarea class="chat-input" id="chatInput" placeholder="Написать сообщение..." rows="1"></textarea><button class="chat-send" onclick="sendMsg()">➤</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EVENTS -->
+      <div id="startup-events" class="dash-panel">
+        <div id="eventsGrid"></div>
+      </div>
+
+      <!-- TARIFF -->
+      <div id="startup-tariff" class="dash-panel">
+        <div class="commission-notice">⚠️ <strong>Напоминание:</strong> Комиссия платформы составляет <strong>8% от суммы инвестиций</strong>, проведённых через WayInvest. Размер комиссии фиксирован и не подлежит изменению или оспариванию.</div>
+        <div class="grid-4" style="align-items:start;">
+          <div class="pkg-card" onclick="showToast('Базовый тариф — ваш текущий уровень','ℹ️')"><div class="pkg-name">Базовый</div><div class="pkg-price">0₽<span>/мес</span></div><ul class="pkg-features"><li>Профиль стартапа</li><li>Базовое описание</li><li>Каталог инвесторов</li><li class="no">AI-подбор</li></ul><button class="btn btn-ghost" style="width:100%" disabled>Текущий</button></div>
+          <div class="pkg-card featured"><div class="pkg-badge">ВЫ ЗДЕСЬ</div><div class="pkg-name">Стартовый</div><div class="pkg-price">4 900₽<span>/мес</span></div><ul class="pkg-features"><li>Приоритет в поиске</li><li>Аналитика</li><li>AI-подбор</li><li class="no">Консультации</li></ul><button class="btn btn-gold" style="width:100%" disabled>Активен</button></div>
+          <div class="pkg-card" onclick="openModal('upgradeModal')"><div class="pkg-name">Премиум</div><div class="pkg-price">12 900₽<span>/мес</span></div><ul class="pkg-features"><li>NDA + водяные знаки</li><li>Консультация</li><li>Высший AI-приоритет</li><li>Документы</li></ul><button class="btn btn-outline" style="width:100%">Улучшить</button></div>
+          <div class="pkg-card" onclick="openModal('upgradeModal')"><div class="pkg-name">Элит</div><div class="pkg-price">29 900₽<span>/мес</span></div><ul class="pkg-features"><li>Персональный менеджер</li><li>Закрытые питч-сессии</li><li>Топ-инвесторы</li><li>Юридическое сопровождение</li></ul><button class="btn btn-outline" style="width:100%">Элит</button></div>
+        </div>
+      </div>
+
+      <!-- DOCS -->
+      <div id="startup-docs" class="dash-panel">
+        <div class="grid-2">
+          <div class="card"><h3 style="margin-bottom:16px;">📄 Пользовательское соглашение</h3><p style="color:var(--text-dim);font-size:.85rem;line-height:1.6;margin-bottom:16px;">Используя платформу WayInvest, вы подтверждаете, что все сделки с инвесторами, найденными через WayInvest, будут проводиться <strong style="color:var(--text)">исключительно через функционал платформы</strong>.</p><p style="color:var(--text-dim);font-size:.85rem;line-height:1.6;margin-bottom:16px;">Комиссия платформы составляет <strong style="color:var(--gold)">8% от суммы инвестиций</strong>. Попытка обойти комиссию путём заключения внеплатформенных сделок является нарушением соглашения и влечёт <strong style="color:var(--red)">немедленную блокировку профиля</strong>.</p><button class="btn btn-outline btn-sm" onclick="openModal('termsModal')">Читать полностью</button></div>
+          <div class="card"><h3 style="margin-bottom:16px;">🔐 NDA-соглашения</h3><p style="color:var(--text-dim);font-size:.85rem;line-height:1.6;margin-bottom:16px;">Список инвесторов, подписавших соглашение о неразглашении при просмотре ваших материалов.</p><table class="data-table" style="font-size:.82rem;"><tr><th>Инвестор</th><th>Дата</th><th>Статус</th></tr><tr><td>Рустам Б.</td><td>10.12.2024</td><td><span class="badge badge-green">Подписан</span></td></tr><tr><td>Магомед А.</td><td>08.12.2024</td><td><span class="badge badge-green">Подписан</span></td></tr></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INVESTOR DASHBOARD ===== -->
+<div id="investorDash" class="screen">
+  <div class="dash-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo" onclick="showScreen('landing')">Way<span>Invest</span></div>
+      <div class="sidebar-section">Основное</div>
+      <div class="sidebar-item active" onclick="showPanel('investor','idashboard')"><span class="icon">🏠</span>Дашборд</div>
+      <div class="sidebar-item" onclick="showPanel('investor','iprofile')"><span class="icon">👤</span>Мой профиль</div>
+      <div class="sidebar-item" onclick="showPanel('investor','iverify')"><span class="icon">🔐</span>Верификация</div>
+      <div class="sidebar-section">Стартапы</div>
+      <div class="sidebar-item" onclick="showPanel('investor','iaiMatch')"><span class="icon">🤖</span>AI-подбор</div>
+      <div class="sidebar-item" onclick="showPanel('investor','icatalog')"><span class="icon">📋</span>Каталог стартапов</div>
+      <div class="sidebar-section">Коммуникации</div>
+      <div class="sidebar-item" onclick="showPanel('investor','ichat')"><span class="icon">💬</span>Чаты</div>
+      <div class="sidebar-item" onclick="showPanel('investor','ievents')"><span class="icon">📅</span>Мероприятия</div>
+      <div class="sidebar-section">Сделки</div>
+      <div class="sidebar-item" onclick="showPanel('investor','ideals')"><span class="icon">🤝</span>Мои сделки</div>
+      <div style="padding:24px;margin-top:auto;"><button class="btn btn-ghost btn-sm" style="width:100%" onclick="showScreen('landing')">← Выйти</button></div>
+    </div>
+    <div class="dash-main">
+      <div class="dash-header">
+        <h1 id="investorPanelTitle">Дашборд</h1>
+        <div class="dash-user">
+          <button class="notif-btn" onclick="showToast('2 новых стартапа соответствуют вашему профилю!','🔔')">🔔<span class="notif-dot"></span></button>
+          <div class="avatar" style="background:linear-gradient(135deg,#3498DB,#2C3E50);">РБ</div>
+          <span style="font-size:.9rem;">Рустам Бекмурзаев</span>
+        </div>
+      </div>
+
+      <!-- INVESTOR DASHBOARD -->
+      <div id="investor-idashboard" class="dash-panel active">
+        <div style="background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
+          <span>✅</span><p style="font-size:.88rem;">Ваш профиль <strong style="color:var(--green)">верифицирован</strong>. Документы ИП проверены администратором.</p>
+        </div>
+        <div class="grid-4" style="margin-bottom:28px;">
+          <div class="stat-box"><div class="num">34</div><div class="lbl">Просмотрено стартапов</div></div>
+          <div class="stat-box"><div class="num">8</div><div class="lbl">Активных переговоров</div></div>
+          <div class="stat-box"><div class="num">2</div><div class="lbl">Завершённых сделки</div></div>
+          <div class="stat-box"><div class="num">₽42М</div><div class="lbl">Инвестировано через WI</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:16px;">AI-рекомендации</h3>
+            <div id="investorAIPreview"></div>
+            <button class="btn btn-outline btn-sm" style="margin-top:14px;" onclick="showPanel('investor','iaiMatch')">Смотреть все совпадения →</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:16px;">Комиссия за сделки</h3>
+            <div style="background:var(--dark3);border-radius:10px;padding:16px;margin-bottom:12px;">
+              <div class="flex-between"><span style="font-size:.85rem;">Ставка комиссии WayInvest:</span><span style="color:var(--gold);font-weight:700;font-size:1.1rem;">8%</span></div>
+            </div>
+            <p style="color:var(--text-dim);font-size:.82rem;line-height:1.5;margin-bottom:12px;">Комиссия 8% удерживается с суммы инвестиций при совершении сделки через платформу. Размер комиссии фиксирован.</p>
+            <div style="background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);border-radius:8px;padding:12px;font-size:.82rem;color:var(--text-dim);">⚠️ Заключение сделок вне платформы запрещено и влечёт блокировку аккаунта.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVESTOR PROFILE -->
+      <div id="investor-iprofile" class="dash-panel">
+        <div class="profile-header">
+          <div class="profile-avatar" style="background:linear-gradient(135deg,#3498DB,#1A252F);">💼</div>
+          <div style="flex:1;">
+            <div class="flex-between"><h2>Рустам Бекмурзаев</h2><span class="badge badge-green">Верифицирован ✓</span></div>
+            <p>Частный инвестор, ИП Бекмурзаев Р.А. Инвестирую в технологические и розничные стартапы на ранних стадиях.</p>
+            <div class="profile-stats">
+              <div class="pstat"><div class="n">2</div><div class="l">сделки</div></div>
+              <div class="pstat"><div class="n">₽42М</div><div class="l">инвестировано</div></div>
+              <div class="pstat"><div class="n">4.9⭐</div><div class="l">рейтинг</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:20px;">Инвестиционный профиль</h3>
+            <div class="form-group"><label>Отраслевой фокус</label><select><option selected>IT / Технологии</option><option>Ритейл</option><option>Финтех</option></select></div>
+            <div class="form-group"><label>Инвестиционный чек (₽)</label><input value="5 000 000 – 20 000 000"></div>
+            <div class="form-group"><label>Предпочтительная стадия</label><select><option selected>Pre-seed</option><option>Seed</option><option>Раунд A</option></select></div>
+            <div class="form-group"><label>Регион поиска</label><input value="Чеченская Республика, СКФО"></div>
+            <button class="btn btn-gold" onclick="showToast('Профиль инвестора обновлён','✅')">Сохранить</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:16px;">Отзывы от стартапов</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="background:var(--dark3);border-radius:8px;padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:.88rem;font-weight:600;">ТехЧечня</span><span style="color:var(--gold);">★★★★★</span></div><p style="color:var(--text-dim);font-size:.82rem;">Профессиональный подход, чёткие условия. Рекомендую!</p></div>
+              <div style="background:var(--dark3);border-radius:8px;padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:.88rem;font-weight:600;">ГрозАгро</span><span style="color:var(--gold);">★★★★★</span></div><p style="color:var(--text-dim);font-size:.82rem;">Честный и надёжный инвестор. Сделка прошла через платформу без проблем.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VERIFY -->
+      <div id="investor-iverify" class="dash-panel">
+        <div style="background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
+          <span style="font-size:2rem;">✅</span>
+          <div><h3 style="color:var(--green);margin-bottom:4px;">Верификация пройдена</h3><p style="color:var(--text-dim);font-size:.88rem;">ИП Бекмурзаев Р.А. | ОГРНИП: 321619600026782 | Проверено: 05.12.2024</p></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px;">Процесс верификации инвесторов</h3>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;gap:14px;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.3);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--green);flex-shrink:0;">✓</div><div><strong>Загрузка документов ИП / юрлица</strong><p style="color:var(--text-dim);font-size:.82rem;">Скан свидетельства ИП или выписка из ЕГРИП/ЕГРЮЛ</p></div></div>
+            <div style="display:flex;gap:14px;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.3);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--green);flex-shrink:0;">✓</div><div><strong>Проверка администратором (1–2 рабочих дня)</strong><p style="color:var(--text-dim);font-size:.82rem;">Модератор платформы проверяет подлинность документов</p></div></div>
+            <div style="display:flex;gap:14px;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.3);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--green);flex-shrink:0;">✓</div><div><strong>Получение статуса «Верифицирован»</strong><p style="color:var(--text-dim);font-size:.82rem;">Открывается полный доступ: просмотр стартапов, переписка, сделки</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVESTOR AI MATCH -->
+      <div id="investor-iaiMatch" class="dash-panel">
+        <div style="background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02));border:1px solid rgba(52,152,219,.3);border-radius:14px;padding:24px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><span style="font-size:1.5rem;">🤖</span><h2 style="font-family:'Playfair Display',serif;">AI-подбор стартапов</h2></div>
+          <p style="color:var(--text-dim);font-size:.9rem;">Алгоритм анализирует ваш инвестиционный профиль и предлагает стартапы по отрасли, чеку и стадии развития.</p>
+        </div>
+        <h3 style="margin-bottom:16px;">Рекомендуемые стартапы</h3>
+        <div id="aiStartupList"></div>
+      </div>
+
+      <!-- INVESTOR CATALOG -->
+      <div id="investor-icatalog" class="dash-panel">
+        <div class="search-bar"><input class="search-input" placeholder="Поиск стартапов..."><button class="btn btn-gold">Найти</button></div>
+        <div class="filter-row">
+          <button class="filter-btn active">Все</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">IT</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Агротех</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Финтех</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Pre-seed</button>
+          <button class="filter-btn" onclick="this.classList.toggle('active')">Seed</button>
+        </div>
+        <div id="startupCatalog"></div>
+      </div>
+
+      <!-- INVESTOR CHAT -->
+      <div id="investor-ichat" class="dash-panel">
+        <div class="chat-layout">
+          <div class="chat-list">
+            <div class="chat-list-header">Сообщения</div>
+            <div class="chat-item active" onclick="selectChat(this,'ТехЧечня (Алихан М.)')"><div class="chat-item-name">ТехЧечня</div><div class="chat-item-preview">Спасибо за интерес!</div><span class="chat-item-time">14:25</span></div>
+            <div class="chat-item" onclick="selectChat(this,'ГрозАгро (Иса Т.)')"><div class="chat-item-name">ГрозАгро</div><div class="chat-item-preview">Питч в четверг в 15:00</div><span class="chat-item-time">Вчера</span></div>
+          </div>
+          <div class="chat-main">
+            <div class="chat-header"><div class="sc-logo" style="width:36px;height:36px;font-size:.9rem;">🚀</div><div><div style="font-weight:600;" id="investorChatPartner">ТехЧечня</div><div style="color:var(--text-dim);font-size:.78rem;">Стартап • Стадия: Pre-seed</div></div></div>
+            <div class="chat-messages" id="investorChatMessages">
+              <div class="msg theirs"><div class="msg-bubble">Добрый день, Рустам! Спасибо за интерес к нашему проекту.</div><div class="msg-time">14:20</div></div>
+              <div class="msg mine"><div class="msg-bubble">Добрый! Изучил ваш питч-дек. Впечатляет тяга. Какой runway у вас сейчас?</div><div class="msg-time">14:23</div></div>
+            </div>
+            <div class="chat-input-area"><textarea class="chat-input" id="investorChatInput" placeholder="Написать сообщение..." rows="1"></textarea><button class="chat-send" onclick="sendInvestorMsg()">➤</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVESTOR EVENTS -->
+      <div id="investor-ievents" class="dash-panel"><div id="investorEventsGrid"></div></div>
+
+      <!-- DEALS -->
+      <div id="investor-ideals" class="dash-panel">
+        <div class="commission-notice">💡 <strong>Все инвестиционные сделки</strong> совершаются исключительно через функционал WayInvest. Комиссия <strong>8%</strong> удерживается автоматически. Внеплатформенные договорённости запрещены.</div>
+        <h3 style="margin-bottom:20px;">История сделок</h3>
+        <table class="data-table">
+          <thead><tr><th>Стартап</th><th>Сумма</th><th>Комиссия (8%)</th><th>Итого</th><th>Дата</th><th>Статус</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ТехЧечня</strong></td><td>₽15 000 000</td><td style="color:var(--gold);">₽1 200 000</td><td>₽16 200 000</td><td>01.11.2024</td><td><span class="badge badge-green">Завершена</span></td></tr>
+            <tr><td><strong>ГрозАгро</strong></td><td>₽27 000 000</td><td style="color:var(--gold);">₽2 160 000</td><td>₽29 160 000</td><td>15.09.2024</td><td><span class="badge badge-green">Завершена</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:20px;"><button class="btn btn-gold" onclick="openModal('newDealModal')">+ Инициировать новую сделку</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN DASHBOARD ===== -->
+<div id="adminDash" class="screen">
+  <div class="dash-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo" onclick="showScreen('landing')">Way<span>Invest</span></div>
+      <div style="background:rgba(201,168,76,.1);border:1px solid var(--border);margin:0 16px 16px;border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--gold);text-align:center;">⚙️ Панель администратора</div>
+      <div class="sidebar-section">Управление</div>
+      <div class="sidebar-item active" onclick="showPanel('admin','admindash')"><span class="icon">📊</span>Обзор</div>
+      <div class="sidebar-item" onclick="showPanel('admin','adminVerify')"><span class="icon">🔐</span>Верификация</div>
+      <div class="sidebar-item" onclick="showPanel('admin','adminStartups')"><span class="icon">🚀</span>Стартапы</div>
+      <div class="sidebar-item" onclick="showPanel('admin','adminInvestors')"><span class="icon">💼</span>Инвесторы</div>
+      <div class="sidebar-section">Система</div>
+      <div class="sidebar-item" onclick="showPanel('admin','adminEvents')"><span class="icon">📅</span>Мероприятия</div>
+      <div class="sidebar-item" onclick="showPanel('admin','adminCommissions')"><span class="icon">💰</span>Комиссии</div>
+      <div class="sidebar-item" onclick="showPanel('admin','adminTariffs')"><span class="icon">💳</span>Тарифы</div>
+      <div style="padding:24px;margin-top:auto;"><button class="btn btn-ghost btn-sm" style="width:100%" onclick="showScreen('landing')">← Выйти</button></div>
+    </div>
+    <div class="dash-main">
+      <div class="dash-header"><h1 id="adminPanelTitle">Обзор платформы</h1><div class="dash-user"><div class="avatar" style="background:linear-gradient(135deg,var(--red),#8E1C0A);">АД</div><span style="font-size:.9rem;">Администратор</span></div></div>
+
+      <!-- ADMIN DASH -->
+      <div id="admin-admindash" class="dash-panel active">
+        <div class="grid-4" style="margin-bottom:28px;">
+          <div class="admin-stat"><div class="admin-stat-icon">🚀</div><div class="admin-stat-info"><div class="val">42</div><div class="lbl">Стартапов на платформе</div></div></div>
+          <div class="admin-stat"><div class="admin-stat-icon">💼</div><div class="admin-stat-info"><div class="val">18</div><div class="lbl">Верифицированных инвесторов</div></div></div>
+          <div class="admin-stat"><div class="admin-stat-icon">⏳</div><div class="admin-stat-info"><div class="val text-red">5</div><div class="lbl">Ожидают верификации</div></div></div>
+          <div class="admin-stat"><div class="admin-stat-icon">💰</div><div class="admin-stat-info"><div class="val text-gold">₽22.4М</div><div class="lbl">Комиссий собрано</div></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:16px;">Последние заявки на верификацию</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--dark3);border-radius:8px;"><div class="avatar" style="width:34px;height:34px;font-size:.8rem;">ДМ</div><div style="flex:1;"><div style="font-size:.88rem;">Дауд Мусаев</div><div style="color:var(--text-dim);font-size:.75rem;">ИП Мусаев Д.Ш. • Подано: сегодня</div></div><button class="btn btn-gold btn-sm" onclick="showToast('Инвестор Дауд Мусаев верифицирован!','✅')">Одобрить</button></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--dark3);border-radius:8px;"><div class="avatar" style="width:34px;height:34px;font-size:.8rem;">АА</div><div style="flex:1;"><div style="font-size:.88rem;">Аиша Алиева</div><div style="color:var(--text-dim);font-size:.75rem;">ИП Алиева А.Р. • Подано: вчера</div></div><button class="btn btn-gold btn-sm" onclick="showToast('Инвестор Аиша Алиева верифицирована!','✅')">Одобрить</button></div>
+            </div>
+            <button class="btn btn-outline btn-sm" style="margin-top:12px;" onclick="showPanel('admin','adminVerify')">Все заявки →</button>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:16px;">Статистика комиссий (8%)</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div class="flex-between" style="padding:10px;background:var(--dark3);border-radius:8px;"><span style="font-size:.85rem;">Декабрь 2024</span><span class="text-gold fw-600">₽4.8М</span></div>
+              <div class="flex-between" style="padding:10px;background:var(--dark3);border-radius:8px;"><span style="font-size:.85rem;">Ноябрь 2024</span><span class="text-gold fw-600">₽6.2М</span></div>
+              <div class="flex-between" style="padding:10px;background:var(--dark3);border-radius:8px;"><span style="font-size:.85rem;">Октябрь 2024</span><span class="text-gold fw-600">₽11.4М</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN VERIFY -->
+      <div id="admin-adminVerify" class="dash-panel">
+        <div class="verify-banner"><span class="icon">⚠️</span><p><strong>5 заявок ожидают проверки.</strong> До прохождения верификации инвесторы не имеют доступа к стартапам и не могут заключать сделки.</p></div>
+        <table class="data-table">
+          <thead><tr><th>ФИО</th><th>Документ</th><th>ОГРНИП</th><th>Подано</th><th>Действие</th></tr></thead>
+          <tbody>
+            <tr><td>Дауд Мусаев</td><td>ИП Мусаев Д.Ш.</td><td>321619600026001</td><td>Сегодня</td><td style="display:flex;gap:8px;padding:14px 16px;"><button class="btn btn-gold btn-sm" onclick="showToast('Одобрено!','✅')">Одобрить</button><button class="btn btn-danger btn-sm" onclick="showToast('Заявка отклонена','❌')">Отклонить</button></td></tr>
+            <tr><td>Аиша Алиева</td><td>ИП Алиева А.Р.</td><td>321619600026002</td><td>Вчера</td><td style="display:flex;gap:8px;padding:14px 16px;"><button class="btn btn-gold btn-sm" onclick="showToast('Одобрено!','✅')">Одобрить</button><button class="btn btn-danger btn-sm" onclick="showToast('Заявка отклонена','❌')">Отклонить</button></td></tr>
+            <tr><td>Беслан Хасанов</td><td>ООО «ГрозИнвест»</td><td>7205105008</td><td>3 дня назад</td><td style="display:flex;gap:8px;padding:14px 16px;"><button class="btn btn-gold btn-sm" onclick="showToast('Одобрено!','✅')">Одобрить</button><button class="btn btn-danger btn-sm" onclick="showToast('Заявка отклонена','❌')">Отклонить</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ADMIN STARTUPS -->
+      <div id="admin-adminStartups" class="dash-panel">
+        <div class="search-bar" style="margin-bottom:20px;"><input class="search-input" placeholder="Поиск стартапов..."><button class="btn btn-gold">Найти</button></div>
+        <table class="data-table">
+          <thead><tr><th>Стартап</th><th>Отрасль</th><th>Тариф</th><th>Статус</th><th>Действие</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ТехЧечня</strong></td><td>IT / Маркетплейс</td><td><span class="badge badge-blue">Стартовый</span></td><td><span class="badge badge-green">Активен</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Профиль открыт','👁️')">Просмотр</button></td></tr>
+            <tr><td><strong>ГрозАгро</strong></td><td>Агротех</td><td><span class="badge badge-gold">Премиум</span></td><td><span class="badge badge-green">Активен</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Профиль открыт','👁️')">Просмотр</button></td></tr>
+            <tr><td><strong>ЧечняФинтех</strong></td><td>Финтех</td><td><span class="badge badge-green">Базовый</span></td><td><span class="badge badge-red">На модерации</span></td><td><button class="btn btn-gold btn-sm" onclick="showToast('Стартап одобрен!','✅')">Одобрить</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ADMIN INVESTORS -->
+      <div id="admin-adminInvestors" class="dash-panel">
+        <table class="data-table">
+          <thead><tr><th>Инвестор</th><th>Документ</th><th>Сделки</th><th>Статус</th><th>Действие</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Рустам Бекмурзаев</strong></td><td>ИП</td><td>2 (₽42М)</td><td><span class="badge badge-green">Верифицирован</span></td><td><button class="btn btn-danger btn-sm" onclick="showToast('Аккаунт приостановлен','⚠️')">Приостановить</button></td></tr>
+            <tr><td><strong>Магомед Ахматов</strong></td><td>ИП</td><td>1 (₽8М)</td><td><span class="badge badge-green">Верифицирован</span></td><td><button class="btn btn-danger btn-sm" onclick="showToast('Аккаунт приостановлен','⚠️')">Приостановить</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ADMIN EVENTS -->
+      <div id="admin-adminEvents" class="dash-panel">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:20px;"><button class="btn btn-gold" onclick="openModal('addEventModal')">+ Создать мероприятие</button></div>
+        <div id="adminEventsGrid"></div>
+      </div>
+
+      <!-- ADMIN COMMISSIONS -->
+      <div id="admin-adminCommissions" class="dash-panel">
+        <div class="card" style="margin-bottom:24px;">
+          <h3 style="margin-bottom:16px;">Настройки комиссии</h3>
+          <div style="background:rgba(201,168,76,.08);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;">
+            <div class="flex-between"><div><div style="font-size:1.1rem;font-weight:600;">Текущая комиссия платформы</div><div style="color:var(--text-dim);font-size:.85rem;">Фиксирована в Пользовательском соглашении</div></div><div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:700;">8%</div></div>
+          </div>
+          <p style="color:var(--text-dim);font-size:.85rem;line-height:1.6;">Комиссия 8% закреплена в Пользовательском соглашении. Инвестор не может оспорить или изменить этот размер. При изменении ставки все зарегистрированные пользователи уведомляются за 30 дней.</p>
+        </div>
+        <h3 style="margin-bottom:16px;">История транзакций</h3>
+        <table class="data-table">
+          <thead><tr><th>Сделка</th><th>Инвестор</th><th>Сумма инвестиции</th><th>Комиссия 8%</th><th>Дата</th></tr></thead>
+          <tbody>
+            <tr><td>ТехЧечня</td><td>Бекмурзаев Р.</td><td>₽15 000 000</td><td class="text-gold fw-600">₽1 200 000</td><td>01.11.2024</td></tr>
+            <tr><td>ГрозАгро</td><td>Бекмурзаев Р.</td><td>₽27 000 000</td><td class="text-gold fw-600">₽2 160 000</td><td>15.09.2024</td></tr>
+            <tr><td>ЧечняФинтех</td><td>Ахматов М.</td><td>₽8 000 000</td><td class="text-gold fw-600">₽640 000</td><td>03.08.2024</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ADMIN TARIFFS -->
+      <div id="admin-adminTariffs" class="dash-panel">
+        <div class="grid-2">
+          <div class="card"><h3 style="margin-bottom:16px;">Управление тарифами</h3>
+            <table class="data-table" style="font-size:.85rem;"><thead><tr><th>Тариф</th><th>Цена/мес</th><th>Подписчики</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Базовый</td><td>0₽</td><td>28</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
+              <tr><td>Стартовый</td><td>4 900₽</td><td>9</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
+              <tr><td>Премиум</td><td>12 900₽</td><td>4</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
+              <tr><td>Элит</td><td>29 900₽</td><td>1</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
+            </tbody></table>
+          </div>
+          <div class="card"><h3 style="margin-bottom:16px;">Доходность тарифов</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div><div class="flex-between" style="font-size:.85rem;margin-bottom:5px;"><span>Стартовый (×9)</span><span class="text-gold">₽44 100/мес</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div></div>
+              <div><div class="flex-between" style="font-size:.85rem;margin-bottom:5px;"><span>Премиум (×4)</span><span class="text-gold">₽51 600/мес</span></div><div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div></div>
+              <div><div class="flex-between" style="font-size:.85rem;margin-bottom:5px;"><span>Элит (×1)</span><span class="text-gold">₽29 900/мес</span></div><div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- LOGIN -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+    <h2>Войти в WayInvest</h2>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this)">Стартап</button>
+      <button class="tab" onclick="switchTab(this)">Инвестор</button>
+      <button class="tab" onclick="switchTab(this)">Администратор</button>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="example@mail.ru"></div>
+    <div class="form-group"><label>Пароль</label><input type="password" placeholder="••••••••"></div>
+    <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="handleLogin()">Войти</button>
+    <div style="text-align:center;margin-top:16px;color:var(--text-dim);font-size:.85rem;">Нет аккаунта? <a style="color:var(--gold);cursor:pointer;" onclick="closeModal('loginModal');openModal('registerModal')">Зарегистрироваться</a></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
+    <h2>Регистрация</h2>
+    <div class="tabs">
+      <button class="tab active" id="regTabStartup" onclick="switchTab(this);showRegForm('startup')">Стартап</button>
+      <button class="tab" id="regTabInvestor" onclick="switchTab(this);showRegForm('investor')">Инвестор</button>
+    </div>
+    <div id="regFormStartup">
+      <div class="form-group"><label>Название стартапа</label><input placeholder="ТехЧечня"></div>
+      <div class="form-group"><label>ФИО основателя</label><input placeholder="Алихан Мусаев"></div>
+      <div class="form-group"><label>Email</label><input type="email" placeholder="founder@startup.ru"></div>
+      <div class="form-group"><label>Пароль</label><input type="password" placeholder="••••••••"></div>
+      <div class="form-group"><label>Отрасль</label><select><option>IT / Технологии</option><option>Агротех</option><option>Финтех</option><option>Логистика</option><option>Ритейл</option></select></div>
+      <div style="background:rgba(201,168,76,.08);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;font-size:.82rem;color:var(--text-dim);">
+        ✓ Регистрация стартапа бесплатна<br>
+        ✓ Комиссия 8% взимается только при инвестиционной сделке<br>
+        ✓ Принимая соглашение, вы подтверждаете, что сделки будут проводиться только через WayInvest
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;"><input type="checkbox" id="agreeStartup"><label for="agreeStartup" style="font-size:.85rem;color:var(--text-dim);">Я принимаю <a style="color:var(--gold);cursor:pointer;" onclick="openModal('termsModal')">Пользовательское соглашение</a> и подтверждаю правила платформы</label></div>
+      <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="completeReg('startup')">Зарегистрировать стартап →</button>
+    </div>
+    <div id="regFormInvestor" style="display:none;">
+      <div class="form-group"><label>ФИО</label><input placeholder="Рустам Бекмурзаев"></div>
+      <div class="form-group"><label>Email</label><input type="email" placeholder="investor@mail.ru"></div>
+      <div class="form-group"><label>Пароль</label><input type="password" placeholder="••••••••"></div>
+      <div class="form-group"><label>Статус (ИП / ООО)</label><input placeholder="ИП Бекмурзаев Р.А."></div>
+      <div class="form-group"><label>ОГРНИП / ОГРН</label><input placeholder="321619600026782"></div>
+      <div class="form-group"><label>Документ (скан ИП)</label><input type="file" style="color:var(--text-dim)"></div>
+      <div style="background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:.82rem;color:var(--text-dim);">
+        ⚠️ До прохождения верификации администратором вы не можете просматривать стартапы, писать им или заключать сделки.<br><br>
+        Комиссия платформы составляет <strong style="color:var(--gold);">8%</strong> от суммы инвестиций. Данный размер фиксирован и не может быть оспорен.
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;"><input type="checkbox" id="agreeInvestor"><label for="agreeInvestor" style="font-size:.85rem;color:var(--text-dim);">Я принимаю соглашение и подтверждаю комиссию 8%</label></div>
+      <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="completeReg('investor')">Зарегистрироваться →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS -->
+<div class="modal-overlay" id="termsModal">
+  <div class="modal" style="max-width:680px;">
+    <button class="modal-close" onclick="closeModal('termsModal')">✕</button>
+    <h2>Пользовательское соглашение</h2>
+    <div style="color:var(--text-dim);font-size:.85rem;line-height:1.8;max-height:60vh;overflow-y:auto;">
+      <p><strong style="color:var(--gold);">1. Комиссия платформы</strong><br>
+      Оператор платформы WayInvest взимает комиссию в размере <strong style="color:var(--gold);">8% (восемь процентов)</strong> от суммы каждой инвестиционной сделки, совершённой через платформу. Данный размер комиссии является фиксированным, закреплён в настоящем Соглашении и <strong style="color:var(--text);">не может быть изменён, оспорен или пересмотрен</strong> ни инвестором, ни стартапом в одностороннем порядке.</p>
+      <br>
+      <p><strong style="color:var(--gold);">2. Обязательность проведения сделок через платформу</strong><br>
+      Все инвестиционные сделки между инвесторами и стартапами, познакомившимися через WayInvest, должны быть проведены исключительно через функционал платформы. Сделка считается совершённой и защищённой только при использовании платёжного и документального функционала WayInvest.</p>
+      <br>
+      <p><strong style="color:var(--gold);">3. Запрет обходных сделок</strong><br>
+      Заключение сделок, договорённостей или переводов вне платформы с целью избежать уплаты комиссии является грубым нарушением настоящего Соглашения. Нарушение влечёт <strong style="color:var(--red);">немедленную блокировку профиля</strong> и может стать основанием для юридических претензий.</p>
+      <br>
+      <p><strong style="color:var(--gold);">4. Верификация инвесторов</strong><br>
+      Инвестор обязан пройти верификацию личности и правового статуса (ИП, ООО и т.д.) до получения доступа к профилям стартапов. До завершения верификации инвестор не имеет права просматривать материалы стартапов, вести переписку и заключать сделки.</p>
+      <br>
+      <p><strong style="color:var(--gold);">5. Защита конфиденциальной информации</strong><br>
+      Просматривая детальные материалы стартапа (финансовые показатели, техническая документация, бизнес-план), инвестор подтверждает принятие условий NDA (соглашения о неразглашении). Передача, копирование или разглашение данных материалов третьим лицам запрещена.</p>
+      <br>
+      <p><strong style="color:var(--gold);">6. Ответственность</strong><br>
+      Стартап несёт ответственность за достоверность предоставленной информации. Инвестор несёт ответственность за подлинность документов при верификации. WayInvest не является стороной инвестиционной сделки, а выступает платформой-посредником.</p>
+    </div>
+    <button class="btn btn-gold" style="margin-top:20px;" onclick="closeModal('termsModal');showToast('Соглашение принято','✅')">Принять и закрыть</button>
+  </div>
+</div>
+
+<!-- NDA MODAL -->
+<div class="modal-overlay" id="ndaModal">
+  <div class="modal" style="text-align:center;max-width:520px;">
+    <h2>🔐 Соглашение о неразглашении</h2>
+    <p style="color:#8A8680;font-size:.9rem;line-height:1.7;margin-bottom:24px;">Вы запрашиваете доступ к конфиденциальным материалам стартапа. Просматривая данные документы, вы подтверждаете, что не будете раскрывать, копировать или передавать информацию третьим лицам.</p>
+    <div style="background:#222836;border-radius:10px;padding:16px;margin-bottom:24px;text-align:left;font-size:.82rem;color:#8A8680;">
+      <div style="margin-bottom:6px;">📋 Документы: <strong style="color:#E8E4DC;">PitchDeck + Финансовая модель</strong></div>
+      <div style="margin-bottom:6px;">🏢 Стартап: <strong style="color:#E8E4DC;">ТехЧечня</strong></div>
+      <div>📅 Дата: <strong style="color:#E8E4DC;">15.12.2024</strong></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button class="btn btn-ghost" onclick="closeModal('ndaModal')">Отмена</button>
+      <button class="btn btn-gold" onclick="signNdaAndOpenDocs()">Подписать NDA и открыть файлы</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENTS VIEWER MODAL (opens after NDA signing) -->
+<div class="modal-overlay" id="docsViewerModal">
+  <div class="modal" style="max-width:820px;padding:0;overflow:hidden;">
+    <div style="background:#1A1E26;padding:18px 24px;border-bottom:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="color:#C9A84C;font-size:1.1rem;">🔐</span>
+        <span style="font-weight:600;color:#E8E4DC;">Защищённый просмотр документов</span>
+        <span style="background:rgba(46,204,113,.15);color:#2ECC71;border:1px solid rgba(46,204,113,.3);border-radius:20px;padding:3px 12px;font-size:.72rem;font-weight:700;">NDA ПОДПИСАН</span>
+      </div>
+      <button class="modal-close" style="position:static;" onclick="closeModal('docsViewerModal')">✕</button>
+    </div>
+    <!-- Doc tabs -->
+    <div style="display:flex;background:#111318;border-bottom:1px solid rgba(201,168,76,.15);">
+      <button onclick="switchDoc('pitchdeck',this)" id="docTab1" style="flex:1;padding:14px 20px;background:#1A1E26;color:#C9A84C;border:none;border-bottom:2px solid #C9A84C;font-family:'Jost',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;">📊 PitchDeck</button>
+      <button onclick="switchDoc('finance',this)" id="docTab2" style="flex:1;padding:14px 20px;background:transparent;color:#8A8680;border:none;border-bottom:2px solid transparent;font-family:'Jost',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;">📈 Финансовая модель</button>
+    </div>
+    <!-- Watermark notice -->
+    <div style="background:rgba(201,168,76,.06);border-bottom:1px solid rgba(201,168,76,.15);padding:8px 24px;font-size:.75rem;color:#8A8680;display:flex;align-items:center;gap:8px;">
+      <span>💧</span> Документ защищён персональными водяными знаками. Скачивание недоступно. Просмотр логируется.
+    </div>
+    <!-- PITCHDECK CONTENT -->
+    <div id="docPitchdeck" style="padding:28px;max-height:65vh;overflow-y:auto;">
+      <div style="position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;transform:rotate(-25deg);font-size:3.5rem;font-weight:900;color:rgba(201,168,76,.055);font-family:'Playfair Display',serif;letter-spacing:6px;white-space:nowrap;z-index:10;">WAYINVEST РУСТАМ Б.</div>
+        <!-- Slide 1 -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:32px;margin-bottom:16px;min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;">
+          <div style="font-size:.72rem;color:#8A8680;position:absolute;top:12px;right:16px;">Слайд 1 / 10</div>
+          <div style="font-size:2.8rem;margin-bottom:12px;">🚀</div>
+          <div style="font-family:'Playfair Display',serif;font-size:2rem;color:#C9A84C;font-weight:700;margin-bottom:8px;">ТехЧечня</div>
+          <div style="color:#8A8680;font-size:1rem;">Маркетплейс локальных услуг</div>
+          <div style="margin-top:16px;color:#E8E4DC;font-size:.9rem;">Pre-seed раунд • 2024</div>
+        </div>
+        <!-- Slide 2 -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:28px;margin-bottom:16px;">
+          <div style="font-size:.72rem;color:#8A8680;text-align:right;margin-bottom:12px;">Слайд 2 / 10 — Проблема</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#C9A84C;margin-bottom:16px;">Проблема</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+            <div style="background:#1A1E26;border-radius:8px;padding:16px;text-align:center;"><div style="font-size:1.6rem;margin-bottom:8px;">😤</div><div style="font-size:.85rem;color:#E8E4DC;">Сложно найти надёжного мастера</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:16px;text-align:center;"><div style="font-size:1.6rem;margin-bottom:8px;">📞</div><div style="font-size:.85rem;color:#E8E4DC;">Только сарафанное радио</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:16px;text-align:center;"><div style="font-size:1.6rem;margin-bottom:8px;">💸</div><div style="font-size:.85rem;color:#E8E4DC;">Нет прозрачного ценообразования</div></div>
+          </div>
+        </div>
+        <!-- Slide 3 -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:28px;margin-bottom:16px;">
+          <div style="font-size:.72rem;color:#8A8680;text-align:right;margin-bottom:12px;">Слайд 3 / 10 — Решение</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#C9A84C;margin-bottom:16px;">Наше решение</div>
+          <div style="color:#8A8680;font-size:.9rem;line-height:1.7;margin-bottom:16px;">ТехЧечня — мобильный маркетплейс, который соединяет жителей Грозного и ЧР с проверенными исполнителями услуг: ремонт, уборка, репетиторство, доставка и ещё 12 категорий.</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="background:rgba(201,168,76,.12);color:#C9A84C;border:1px solid rgba(201,168,76,.3);border-radius:6px;padding:5px 14px;font-size:.82rem;">✓ Рейтинги и отзывы</span>
+            <span style="background:rgba(201,168,76,.12);color:#C9A84C;border:1px solid rgba(201,168,76,.3);border-radius:6px;padding:5px 14px;font-size:.82rem;">✓ Онлайн-оплата</span>
+            <span style="background:rgba(201,168,76,.12);color:#C9A84C;border:1px solid rgba(201,168,76,.3);border-radius:6px;padding:5px 14px;font-size:.82rem;">✓ Гарантия сделки</span>
+          </div>
+        </div>
+        <!-- Slide 4 — Traction -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:28px;margin-bottom:16px;">
+          <div style="font-size:.72rem;color:#8A8680;text-align:right;margin-bottom:12px;">Слайд 4 / 10 — Тяга</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#C9A84C;margin-bottom:20px;">Результаты за 12 месяцев</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+            <div style="background:#1A1E26;border-radius:8px;padding:14px;text-align:center;"><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#C9A84C;font-weight:700;">1 200</div><div style="color:#8A8680;font-size:.75rem;margin-top:4px;">Пользователей</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:14px;text-align:center;"><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#C9A84C;font-weight:700;">200</div><div style="color:#8A8680;font-size:.75rem;margin-top:4px;">Исполнителей</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:14px;text-align:center;"><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#C9A84C;font-weight:700;">₽4.2М</div><div style="color:#8A8680;font-size:.75rem;margin-top:4px;">ARR</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:14px;text-align:center;"><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#C9A84C;font-weight:700;">4.8★</div><div style="color:#8A8680;font-size:.75rem;margin-top:4px;">Рейтинг App Store</div></div>
+          </div>
+        </div>
+        <!-- Slide 5 — Ask -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:28px;">
+          <div style="font-size:.72rem;color:#8A8680;text-align:right;margin-bottom:12px;">Слайд 5 / 10 — Запрос</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#C9A84C;margin-bottom:16px;">Мы ищем инвестиции</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div style="background:#1A1E26;border-radius:8px;padding:18px;"><div style="color:#C9A84C;font-weight:700;margin-bottom:6px;">Сумма раунда</div><div style="font-size:1.4rem;font-weight:700;color:#E8E4DC;">₽10 000 000</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:18px;"><div style="color:#C9A84C;font-weight:700;margin-bottom:6px;">Использование средств</div><div style="font-size:.85rem;color:#8A8680;line-height:1.5;">Маркетинг 40% • Разработка 35% • Операции 25%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- FINANCE CONTENT -->
+    <div id="docFinance" style="display:none;padding:28px;max-height:65vh;overflow-y:auto;">
+      <div style="position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none;transform:rotate(-25deg);font-size:3.5rem;font-weight:900;color:rgba(201,168,76,.055);font-family:'Playfair Display',serif;letter-spacing:6px;white-space:nowrap;z-index:10;">WAYINVEST РУСТАМ Б.</div>
+        <!-- Revenue table -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:24px;margin-bottom:16px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#C9A84C;margin-bottom:18px;">📊 Выручка и рост (₽)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+            <thead><tr style="border-bottom:1px solid rgba(201,168,76,.25);">
+              <th style="text-align:left;padding:10px 12px;color:#8A8680;font-weight:600;">Квартал</th>
+              <th style="text-align:right;padding:10px 12px;color:#8A8680;font-weight:600;">Выручка</th>
+              <th style="text-align:right;padding:10px 12px;color:#8A8680;font-weight:600;">Рост MoM</th>
+              <th style="text-align:right;padding:10px 12px;color:#8A8680;font-weight:600;">Пользователей</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(255,255,255,.04);"><td style="padding:10px 12px;color:#E8E4DC;">Q1 2024</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">₽680 000</td><td style="padding:10px 12px;text-align:right;color:#2ECC71;">+18%</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">340</td></tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,.04);"><td style="padding:10px 12px;color:#E8E4DC;">Q2 2024</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">₽890 000</td><td style="padding:10px 12px;text-align:right;color:#2ECC71;">+31%</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">620</td></tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,.04);"><td style="padding:10px 12px;color:#E8E4DC;">Q3 2024</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">₽1 150 000</td><td style="padding:10px 12px;text-align:right;color:#2ECC71;">+29%</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">890</td></tr>
+              <tr><td style="padding:10px 12px;color:#E8E4DC;">Q4 2024</td><td style="padding:10px 12px;text-align:right;color:#C9A84C;font-weight:700;">₽1 480 000</td><td style="padding:10px 12px;text-align:right;color:#2ECC71;">+29%</td><td style="padding:10px 12px;text-align:right;color:#C9A84C;font-weight:700;">1 200</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Unit economics -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:24px;margin-bottom:16px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#C9A84C;margin-bottom:18px;">💡 Юнит-экономика</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+            <div style="background:#1A1E26;border-radius:8px;padding:16px;text-align:center;"><div style="color:#8A8680;font-size:.75rem;margin-bottom:6px;">CAC</div><div style="font-size:1.3rem;font-weight:700;color:#E8E4DC;">₽320</div><div style="color:#8A8680;font-size:.72rem;">стоимость привлечения</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:16px;text-align:center;"><div style="color:#8A8680;font-size:.75rem;margin-bottom:6px;">LTV</div><div style="font-size:1.3rem;font-weight:700;color:#2ECC71;">₽4 800</div><div style="color:#8A8680;font-size:.72rem;">жизненная ценность</div></div>
+            <div style="background:#1A1E26;border-radius:8px;padding:16px;text-align:center;"><div style="color:#8A8680;font-size:.75rem;margin-bottom:6px;">LTV/CAC</div><div style="font-size:1.3rem;font-weight:700;color:#C9A84C;">15x</div><div style="color:#8A8680;font-size:.72rem;">коэффициент окупаемости</div></div>
+          </div>
+        </div>
+        <!-- Forecast -->
+        <div style="background:#111318;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:24px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#C9A84C;margin-bottom:18px;">📅 Прогноз 2025 (с инвестицией ₽10М)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+            <thead><tr style="border-bottom:1px solid rgba(201,168,76,.25);">
+              <th style="text-align:left;padding:10px 12px;color:#8A8680;font-weight:600;">Месяц</th>
+              <th style="text-align:right;padding:10px 12px;color:#8A8680;font-weight:600;">Выручка</th>
+              <th style="text-align:right;padding:10px 12px;color:#8A8680;font-weight:600;">Расходы</th>
+              <th style="text-align:right;padding:10px 12px;color:#8A8680;font-weight:600;">EBITDA</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(255,255,255,.04);"><td style="padding:10px 12px;color:#E8E4DC;">Янв 2025</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">₽1 700 000</td><td style="padding:10px 12px;text-align:right;color:#E74C3C;">₽1 400 000</td><td style="padding:10px 12px;text-align:right;color:#2ECC71;">₽300 000</td></tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,.04);"><td style="padding:10px 12px;color:#E8E4DC;">Мар 2025</td><td style="padding:10px 12px;text-align:right;color:#E8E4DC;">₽2 100 000</td><td style="padding:10px 12px;text-align:right;color:#E74C3C;">₽1 550 000</td><td style="padding:10px 12px;text-align:right;color:#2ECC71;">₽550 000</td></tr>
+              <tr><td style="padding:10px 12px;color:#E8E4DC;">Июн 2025</td><td style="padding:10px 12px;text-align:right;color:#C9A84C;font-weight:700;">₽3 200 000</td><td style="padding:10px 12px;text-align:right;color:#E74C3C;">₽1 800 000</td><td style="padding:10px 12px;text-align:right;color:#2ECC71;font-weight:700;">₽1 400 000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="background:#1A1E26;border-top:1px solid rgba(201,168,76,.15);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:.75rem;color:#8A8680;">🔒 Просмотр защищён NDA • Действия логируются • Рустам Бекмурзаев • 15.12.2024</span>
+      <button class="btn btn-gold btn-sm" onclick="closeModal('docsViewerModal');openModal('newDealModal')">Инвестировать в стартап →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PACKAGE MODAL -->
+<div class="modal-overlay" id="pkgModal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeModal('pkgModal')">✕</button>
+    <h2 id="pkgModalTitle">Подключить тариф</h2>
+    <p style="color:var(--text-dim);margin-bottom:24px;" id="pkgModalDesc">Улучшите видимость вашего стартапа</p>
+    <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="closeModal('pkgModal');openModal('registerModal')">Зарегистрироваться и подключить →</button>
+  </div>
+</div>
+
+<!-- UPGRADE -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeModal('upgradeModal')">✕</button>
+    <h2>Улучшить тариф</h2>
+    <p style="color:var(--text-dim);margin-bottom:24px;">Выберите способ оплаты для перехода на Премиум (₽12 900/мес)</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;text-align:left;">
+      <div style="padding:14px;background:var(--dark3);border-radius:8px;border:1px solid var(--border);cursor:pointer;display:flex;gap:12px;" onclick="this.style.borderColor='var(--gold)'"><span>💳</span><span>Банковская карта</span></div>
+      <div style="padding:14px;background:var(--dark3);border-radius:8px;border:1px solid var(--border);cursor:pointer;display:flex;gap:12px;" onclick="this.style.borderColor='var(--gold)'"><span>📱</span><span>Сбербанк Онлайн / СБП</span></div>
+    </div>
+    <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="closeModal('upgradeModal');showToast('Тариф Премиум активирован!','🌟')">Оплатить ₽12 900 →</button>
+  </div>
+</div>
+
+<!-- NEW DEAL -->
+<div class="modal-overlay" id="newDealModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('newDealModal')">✕</button>
+    <h2>Новая инвестиционная сделка</h2>
+    <div style="background:rgba(201,168,76,.08);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:20px;font-size:.83rem;color:var(--text-dim);">Сделка будет проведена через платформу WayInvest. Комиссия <strong style="color:var(--gold)">8%</strong> будет удержана автоматически.</div>
+    <div class="form-group"><label>Стартап</label><select><option>ТехЧечня</option><option>ГрозАгро</option></select></div>
+    <div class="form-group"><label>Сумма инвестиций (₽)</label><input type="number" placeholder="10000000" id="dealAmount" oninput="calcCommission()"></div>
+    <div style="background:var(--dark3);border-radius:8px;padding:14px;margin-bottom:20px;">
+      <div class="flex-between" style="font-size:.88rem;margin-bottom:6px;"><span>Сумма инвестиции:</span><span id="dealAmountShow">—</span></div>
+      <div class="flex-between" style="font-size:.88rem;margin-bottom:6px;"><span>Комиссия WayInvest (8%):</span><span style="color:var(--gold);" id="dealCommShow">—</span></div>
+      <div class="flex-between" style="font-size:.95rem;font-weight:600;border-top:1px solid var(--border);padding-top:8px;margin-top:8px;"><span>Итого к оплате:</span><span id="dealTotalShow">—</span></div>
+    </div>
+    <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="closeModal('newDealModal');showToast('Сделка инициирована! Стартап получил уведомление.','🤝')">Инициировать сделку →</button>
+  </div>
+</div>
+
+<!-- ADD EVENT -->
+<div class="modal-overlay" id="addEventModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addEventModal')">✕</button>
+    <h2>Создать мероприятие</h2>
+    <div class="form-group"><label>Название</label><input placeholder="Питч-день WayInvest #5"></div>
+    <div class="form-group"><label>Тип</label><select><option>Питч-сессия</option><option>Вебинар</option><option>Мастер-класс</option></select></div>
+    <div class="form-group"><label>Дата и время</label><input type="datetime-local"></div>
+    <div class="form-group"><label>Описание</label><textarea placeholder="Описание мероприятия..."></textarea></div>
+    <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="closeModal('addEventModal');showToast('Мероприятие создано и опубликовано!','📅')">Опубликовать →</button>
+  </div>
+</div>
+
+<!-- STARTUP DETAIL -->
+<div class="modal-overlay" id="startupDetailModal">
+  <div class="modal" style="max-width:640px;">
+    <button class="modal-close" onclick="closeModal('startupDetailModal')">✕</button>
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;">
+      <div class="sc-logo" style="width:56px;height:56px;font-size:1.5rem;">🌾</div>
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1.4rem;">ГрозАгро</h2>
+        <p style="color:var(--text-dim);font-size:.85rem;">Агротех • Seed • Грозный, ЧР</p>
+        <div style="display:flex;gap:8px;margin-top:8px;"><span class="badge badge-gold">Премиум</span><span class="badge badge-green">Верифицирован</span></div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="stat-box"><div class="num">₽12М</div><div class="lbl">Нужны инвестиции</div></div>
+      <div class="stat-box"><div class="num">₽8.4М</div><div class="lbl">ARR</div></div>
+    </div>
+    <p style="color:var(--text-dim);font-size:.88rem;line-height:1.7;margin-bottom:20px;">Платформа для прямых продаж сельскохозяйственной продукции фермерами конечным потребителям. 340 фермеров, 12 000 покупателей в ЧР.</p>
+    <div class="watermarked" style="background:var(--dark3);border-radius:10px;padding:20px;margin-bottom:16px;">
+      <div class="watermark-text">WAYINVEST NDA</div>
+      <div style="font-size:.82rem;color:var(--text-dim);position:relative;z-index:1;">📊 Детальные финансовые показатели и питч-дек доступны после подписания NDA</div>
+    </div>
+    <div style="display:flex;gap:12px;">
+      <button class="btn btn-gold" onclick="closeModal('startupDetailModal');openModal('ndaModal')">🔐 Подписать NDA и открыть файлы</button>
+      <button class="btn btn-outline" onclick="closeModal('startupDetailModal');showPanel('investor','ichat')">💬 Написать стартапу</button>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ============ STATE ============
+let currentRole = 'startup';
+let loginRole = 'startup';
+
+// ============ SCREEN NAVIGATION ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+
+// ============ PANEL NAVIGATION ============
+function showPanel(role, panelId) {
+  const prefix = role === 'startup' ? 'startup' : role === 'investor' ? 'investor' : 'admin';
+  document.querySelectorAll(`#${role}Dash .dash-panel`).forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById(`${prefix}-${panelId}`);
+  if(panel) panel.classList.add('active');
+
+  // Update sidebar
+  document.querySelectorAll(`#${role}Dash .sidebar-item`).forEach(i => {
+    i.classList.toggle('active', i.getAttribute('onclick')?.includes(panelId));
+  });
+
+  // Update header title
+  const titles = {
+    dashboard:'Дашборд', profile:'Мой профиль', project:'Материалы проекта',
+    aiMatch:'AI-подбор', catalog:'Каталог инвесторов', chat:'Чаты',
+    events:'Мероприятия', tariff:'Тариф', docs:'Документы',
+    idashboard:'Дашборд', iprofile:'Мой профиль', iverify:'Верификация',
+    iaiMatch:'AI-подбор стартапов', icatalog:'Каталог стартапов',
+    ichat:'Чаты', ievents:'Мероприятия', ideals:'Мои сделки',
+    admindash:'Обзор платформы', adminVerify:'Верификация инвесторов',
+    adminStartups:'Управление стартапами', adminInvestors:'Управление инвесторами',
+    adminEvents:'Мероприятия', adminCommissions:'Комиссии', adminTariffs:'Тарифы',
+  };
+  const titleEl = document.getElementById(`${role}PanelTitle`);
+  if(titleEl) titleEl.textContent = titles[panelId] || panelId;
+
+  renderDynamicContent(panelId);
+}
+
+// ============ MODALS ============
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target === o) o.classList.remove('active'); });
+});
+
+// ============ LOGIN ============
+function handleLogin() {
+  const tabs = document.querySelectorAll('#loginModal .tab');
+  let role = 'startup';
+  tabs.forEach((t,i) => { if(t.classList.contains('active')) role = ['startup','investor','admin'][i]; });
+  closeModal('loginModal');
+  if(role === 'startup') showScreen('startupDash');
+  else if(role === 'investor') showScreen('investorDash');
+  else showScreen('adminDash');
+  showToast('Добро пожаловать в WayInvest!','👋');
+}
+
+function completeReg(type) {
+  closeModal('registerModal');
+  if(type === 'startup') {
+    showScreen('startupDash');
+    showToast('Стартап зарегистрирован! Добро пожаловать.','🚀');
+  } else {
+    showScreen('investorDash');
+    showToast('Регистрация прошла! Документы отправлены на проверку.','📋');
+  }
+}
+
+// ============ TABS ============
+function switchTab(el) {
+  const parent = el.parentElement;
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function showRegForm(type) {
+  document.getElementById('regFormStartup').style.display = type === 'startup' ? '' : 'none';
+  document.getElementById('regFormInvestor').style.display = type === 'investor' ? '' : 'none';
+}
+
+// ============ TOAST ============
+function showToast(msg, icon = '✓') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+// ============ CHAT ============
+function selectChat(el, name) {
+  el.parentElement.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  const partner = document.getElementById('chatPartner') || document.getElementById('investorChatPartner');
+  if(partner) partner.textContent = name;
+}
+
+function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const msgs = document.getElementById('chatMessages');
+  if(!input || !input.value.trim()) return;
+  const div = document.createElement('div');
+  div.className = 'msg mine';
+  div.innerHTML = `<div class="msg-bubble">${input.value}</div><div class="msg-time">${new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+  setTimeout(() => {
+    const r = document.createElement('div');
+    r.className = 'msg theirs';
+    r.innerHTML = `<div class="msg-bubble">Понял, рассмотрю вашу информацию.</div><div class="msg-time">${new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}</div>`;
+    msgs.appendChild(r);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200);
+}
+
+function sendInvestorMsg() {
+  const input = document.getElementById('investorChatInput');
+  const msgs = document.getElementById('investorChatMessages');
+  if(!input || !input.value.trim()) return;
+  const div = document.createElement('div');
+  div.className = 'msg mine';
+  div.innerHTML = `<div class="msg-bubble">${input.value}</div><div class="msg-time">${new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+  setTimeout(() => {
+    const r = document.createElement('div');
+    r.className = 'msg theirs';
+    r.innerHTML = `<div class="msg-bubble">Спасибо! Ответим в ближайшее время.</div><div class="msg-time">${new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}</div>`;
+    msgs.appendChild(r);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200);
+}
+
+// ============ COMMISSION CALC ============
+function calcCommission() {
+  const val = parseFloat(document.getElementById('dealAmount').value) || 0;
+  const comm = val * 0.08;
+  const total = val + comm;
+  const fmt = n => '₽' + n.toLocaleString('ru');
+  document.getElementById('dealAmountShow').textContent = val ? fmt(val) : '—';
+  document.getElementById('dealCommShow').textContent = val ? fmt(comm) : '—';
+  document.getElementById('dealTotalShow').textContent = val ? fmt(total) : '—';
+}
+
+// ============ SET PKG ============
+function setPkg(type) {
+  const names = {free:'Базовый (бесплатно)',start:'Стартовый — ₽4 900/мес',premium:'Премиум — ₽12 900/мес',elite:'Элит — ₽29 900/мес'};
+  const el = document.getElementById('pkgModalTitle');
+  if(el) el.textContent = names[type] || 'Тариф';
+}
+
+// ============ DYNAMIC DATA ============
+const investors = [
+  {name:'Рустам Бекмурзаев',focus:'IT, Ритейл',check:'₽5–20М',stage:'Pre-seed, Seed',rating:4.9,status:'Верифицирован'},
+  {name:'Магомед Ахматов',focus:'Финтех, IT',check:'₽2–8М',stage:'Pre-seed',rating:4.7,status:'Верифицирован'},
+  {name:'Зулай Алиева',focus:'Агротех, Экология',check:'₽10–30М',stage:'Seed, A',rating:4.8,status:'Верифицирован'},
+  {name:'Беслан Хасанов',focus:'Логистика',check:'₽5–15М',stage:'Pre-seed, Seed',rating:4.6,status:'Верифицирован'},
+];
+
+const startups = [
+  {name:'ТехЧечня',emoji:'🚀',sector:'IT / Маркетплейс',stage:'Pre-seed',need:'₽10М',arr:'₽4.2М',match:92},
+  {name:'ГрозАгро',emoji:'🌾',sector:'Агротех',stage:'Seed',need:'₽12М',arr:'₽8.4М',match:87},
+  {name:'ЧечняФинтех',emoji:'💳',sector:'Финтех',stage:'Pre-seed',need:'₽6М',arr:'₽1.8М',match:78},
+  {name:'ДорогиЧР',emoji:'🚛',sector:'Логистика',stage:'Seed',need:'₽18М',arr:'₽11М',match:71},
+];
+
+const events = [
+  {emoji:'🎤',title:'Питч-день WayInvest #4',type:'Питч-сессия',date:'20 декабря, 2024',time:'14:00',desc:'Лучшие стартапы ЧР представят свои проекты перед инвесторами платформы.',participants:45},
+  {emoji:'💡',title:'Вебинар: Как привлечь первые инвестиции',type:'Вебинар',date:'22 декабря, 2024',time:'12:00',desc:'Практическое руководство по подготовке к инвестиционному раунду.',participants:120},
+  {emoji:'📊',title:'Мастер-класс: Финансовая модель стартапа',type:'Мастер-класс',date:'25 декабря, 2024',time:'15:00',desc:'Как построить правильную финансовую модель для привлечения инвестора.',participants:67},
+  {emoji:'🤝',title:'Нетворкинг для инвесторов ЧР',type:'Сетевое мероприятие',date:'28 декабря, 2024',time:'18:00',desc:'Закрытое мероприятие для верифицированных инвесторов платформы.',participants:22},
+];
+
+function renderDynamicContent(panelId) {
+  if(panelId === 'aiMatch') {
+    const c = document.getElementById('aiInvestorList');
+    if(c && !c.innerHTML) c.innerHTML = investors.map((inv,i) => `
+      <div class="ai-match-card" onclick="openModal('${i===0?'startupDetailModal':'ndaModal'}')">
+        <div class="match-score" style="--pct:${[88,75,68,55][i]}"><span>${[88,75,68,55][i]}%</span></div>
+        <div class="match-info"><h4>${inv.name}</h4><p>${inv.focus} • Чек: ${inv.check} • ${inv.stage}</p><div class="match-tags"><span class="sc-tag">${inv.focus.split(',')[0]}</span><span class="sc-tag">${inv.stage.split(',')[0]}</span></div></div>
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showPanel('startup','chat')">Написать</button>
+      </div>`).join('');
+  }
+  if(panelId === 'catalog') {
+    const c = document.getElementById('investorCatalog');
+    if(c && !c.innerHTML) c.innerHTML = `<div class="grid-2">${investors.map(inv => `
+      <div class="card" style="cursor:pointer;" onclick="showPanel('startup','chat')">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+          <div class="avatar" style="width:48px;height:48px;">${inv.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+          <div><h3 style="font-size:1rem;">${inv.name}</h3><div style="color:var(--text-dim);font-size:.8rem;">${inv.status}</div></div>
+          <span class="badge badge-green" style="margin-left:auto;">${inv.rating}★</span>
+        </div>
+        <div class="sc-tags"><span class="sc-tag">${inv.focus.split(',')[0]}</span><span class="sc-tag">${inv.check}</span><span class="sc-tag">${inv.stage.split(',')[0]}</span></div>
+        <div style="margin-top:14px;display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showPanel('startup','chat')">Написать</button></div>
+      </div>`).join('')}</div>`;
+  }
+  if(panelId === 'iaiMatch') {
+    const c = document.getElementById('aiStartupList');
+    if(c && !c.innerHTML) c.innerHTML = startups.map((s,i) => `
+      <div class="ai-match-card" onclick="openModal('startupDetailModal')">
+        <div class="match-score" style="--pct:${s.match}"><span>${s.match}%</span></div>
+        <div class="match-info"><h4>${s.name}</h4><p>${s.sector} • ${s.stage} • Нужно: ${s.need}</p><div class="match-tags"><span class="sc-tag">ARR: ${s.arr}</span><span class="sc-tag">${s.stage}</span></div></div>
+        <button class="btn btn-gold btn-sm" onclick="event.stopPropagation();openModal('ndaModal')">NDA →</button>
+      </div>`).join('');
+  }
+  if(panelId === 'icatalog') {
+    const c = document.getElementById('startupCatalog');
+    if(c && !c.innerHTML) c.innerHTML = `<div class="grid-2">${startups.map(s => `
+      <div class="startup-card" onclick="openModal('startupDetailModal')">
+        <div class="sc-header">
+          <div class="sc-logo">${s.emoji}</div>
+          <div class="sc-info"><h3>${s.name}</h3><p>${s.sector}</p></div>
+          <span class="badge badge-blue" style="margin-left:auto;">${s.stage}</span>
+        </div>
+        <div class="sc-tags"><span class="sc-tag">${s.sector.split('/')[0]}</span><span class="sc-tag">${s.stage}</span></div>
+        <div class="sc-metrics">
+          <div class="sc-metric"><div class="val">${s.need}</div><div class="key">Нужно</div></div>
+          <div class="sc-metric"><div class="val">${s.arr}</div><div class="key">ARR</div></div>
+          <div class="sc-metric"><div class="val">${s.match}%</div><div class="key">AI-матч</div></div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+  if(panelId === 'events' || panelId === 'ievents') {
+    const cId = panelId === 'events' ? 'eventsGrid' : 'investorEventsGrid';
+    const c = document.getElementById(cId);
+    if(c && !c.innerHTML) c.innerHTML = `<div class="grid-2">${events.map(e => `
+      <div class="event-card">
+        <div class="event-banner">${e.emoji}</div>
+        <div class="event-body">
+          <div class="event-date">📅 ${e.date} • ⏰ ${e.time}</div>
+          <div class="event-title">${e.title}</div>
+          <div class="event-desc">${e.desc}</div>
+          <div class="event-footer">
+            <span class="event-participants">👥 ${e.participants} участников</span>
+            <button class="btn btn-gold btn-sm" onclick="showToast('Вы записаны на ${e.title}!','📅')">Записаться</button>
+          </div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+  if(panelId === 'adminEvents') {
+    const c = document.getElementById('adminEventsGrid');
+    if(c && !c.innerHTML) c.innerHTML = `<div class="grid-2">${events.map(e => `
+      <div class="event-card">
+        <div class="event-banner">${e.emoji}</div>
+        <div class="event-body">
+          <div class="event-date">📅 ${e.date} • ${e.participants} участников</div>
+          <div class="event-title">${e.title}</div>
+          <div class="event-footer"><span class="badge badge-blue">${e.type}</span><button class="btn btn-danger btn-sm" onclick="showToast('Мероприятие отменено','🗑️')">Удалить</button></div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+  if(panelId === 'idashboard') {
+    const c = document.getElementById('investorAIPreview');
+    if(c && !c.innerHTML) c.innerHTML = startups.slice(0,2).map(s => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--dark3);border-radius:8px;margin-bottom:8px;cursor:pointer;" onclick="openModal('startupDetailModal')">
+        <span style="font-size:1.2rem;">${s.emoji}</span>
+        <div style="flex:1;"><div style="font-size:.88rem;font-weight:600;">${s.name}</div><div style="color:var(--text-dim);font-size:.78rem;">${s.sector} • ${s.need}</div></div>
+        <span style="color:var(--gold);font-size:.85rem;font-weight:700;">${s.match}%</span>
+      </div>`).join('');
+  }
+}
+
+// Keyboard: Enter to send chat
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.shiftKey) {
+    const active = document.activeElement;
+    if(active?.id === 'chatInput') { e.preventDefault(); sendMsg(); }
+    if(active?.id === 'investorChatInput') { e.preventDefault(); sendInvestorMsg(); }
+  }
+});
+
+// ============ NDA + DOC VIEWER ============
+function signNdaAndOpenDocs() {
+  closeModal('ndaModal');
+  showToast('NDA подписан! Документы открыты.', '🔐');
+  setTimeout(() => openModal('docsViewerModal'), 300);
+}
+
+function switchDoc(docId, btn) {
+  // hide all doc panels
+  document.getElementById('docPitchdeck').style.display = 'none';
+  document.getElementById('docFinance').style.display = 'none';
+  // show selected
+  document.getElementById('doc' + docId.charAt(0).toUpperCase() + docId.slice(1)).style.display = 'block';
+  // update tab styles
+  [document.getElementById('docTab1'), document.getElementById('docTab2')].forEach(t => {
+    t.style.background = 'transparent';
+    t.style.color = '#8A8680';
+    t.style.borderBottom = '2px solid transparent';
+  });
+  btn.style.background = '#1A1E26';
+  btn.style.color = '#C9A84C';
+  btn.style.borderBottom = '2px solid #C9A84C';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+export const investors = [
+  { name: 'Рустам Бекмурзаев', focus: 'IT, Ритейл', check: '₽5–20М', stage: 'Pre-seed, Seed', rating: 4.9, status: 'Верифицирован' },
+  { name: 'Магомед Ахматов', focus: 'Финтех, IT', check: '₽2–8М', stage: 'Pre-seed', rating: 4.7, status: 'Верифицирован' },
+  { name: 'Зулай Алиева', focus: 'Агротех, Экология', check: '₽10–30М', stage: 'Seed, A', rating: 4.8, status: 'Верифицирован' },
+  { name: 'Беслан Хасанов', focus: 'Логистика', check: '₽5–15М', stage: 'Pre-seed, Seed', rating: 4.6, status: 'Верифицирован' },
+]
+
+export const startups = [
+  { name: 'ТехЧечня', emoji: '🚀', sector: 'IT / Маркетплейс', stage: 'Pre-seed', need: '₽10М', arr: '₽4.2М', match: 92 },
+  { name: 'ГрозАгро', emoji: '🌾', sector: 'Агротех', stage: 'Seed', need: '₽12М', arr: '₽8.4М', match: 87 },
+  { name: 'ЧечняФинтех', emoji: '💳', sector: 'Финтех', stage: 'Pre-seed', need: '₽6М', arr: '₽1.8М', match: 78 },
+  { name: 'ДорогиЧР', emoji: '🚛', sector: 'Логистика', stage: 'Seed', need: '₽18М', arr: '₽11М', match: 71 },
+]
+
+export const events = [
+  { emoji: '🎤', title: 'Питч-день WayInvest #4', type: 'Питч-сессия', date: '20 декабря, 2024', time: '14:00', desc: 'Лучшие стартапы ЧР представят свои проекты перед инвесторами платформы.', participants: 45 },
+  { emoji: '💡', title: 'Вебинар: Как привлечь первые инвестиции', type: 'Вебинар', date: '22 декабря, 2024', time: '12:00', desc: 'Практическое руководство по подготовке к инвестиционному раунду.', participants: 120 },
+  { emoji: '📊', title: 'Мастер-класс: Финансовая модель стартапа', type: 'Мастер-класс', date: '25 декабря, 2024', time: '15:00', desc: 'Как построить правильную финансовую модель для привлечения инвестора.', participants: 67 },
+  { emoji: '🤝', title: 'Нетворкинг для инвесторов ЧР', type: 'Сетевое мероприятие', date: '28 декабря, 2024', time: '18:00', desc: 'Закрытое мероприятие для верифицированных инвесторов платформы.', participants: 22 },
+]
+
+export const aiScores = [88, 75, 68, 55]
