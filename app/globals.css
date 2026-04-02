@@ -81,8 +81,8 @@ button,input[type="button"],input[type="submit"] { -webkit-appearance:none; appe
 .toast-msg { font-size:.9rem; }
 
 .hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden; padding:40px 20px; }
-.hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(201,168,76,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 20% 80%,rgba(201,168,76,.04) 0%,transparent 50%); }
-.hero-lines { position:absolute; inset:0; background-image:linear-gradient(rgba(201,168,76,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.03) 1px,transparent 1px); background-size:60px 60px; }
+.hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(201,168,76,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 20% 80%,rgba(201,168,76,.04) 0%,transparent 50%); pointer-events:none; }
+.hero-lines { position:absolute; inset:0; background-image:linear-gradient(rgba(201,168,76,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.03) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; }
 .hero-badge { background:rgba(201,168,76,.1); border:1px solid var(--border); border-radius:20px; padding:6px 18px; font-size:.8rem; color:var(--gold); margin-bottom:28px; display:inline-block; }
 .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.8rem,7vw,5.5rem); font-weight:900; line-height:1.1; margin-bottom:24px; }
 .hero h1 span { color:var(--gold); }
