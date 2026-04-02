@@ -1,27 +1,21 @@
-import nodemailer from 'nodemailer'
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-})
+const BREVO_API_KEY = process.env.BREVO_API_KEY
+const SENDER_EMAIL = process.env.GMAIL_USER || 'lorsvvu@gmail.com'
 
 export async function sendVerificationCode(to: string, code: string) {
   console.log(`[EMAIL] Sending code ${code} to ${to}...`)
 
-  try {
-    const info = await transporter.sendMail({
-      from: `"WayInvest" <${process.env.GMAIL_USER}>`,
-      to,
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': BREVO_API_KEY!,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: { name: 'WayInvest', email: SENDER_EMAIL },
+      to: [{ email: to }],
       subject: `${code} — код подтверждения WayInvest`,
-      html: `
+      htmlContent: `
         <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#111318;color:#E8E4DC;border-radius:16px;">
           <h1 style="color:#C9A84C;font-size:24px;margin-bottom:8px;">WayInvest</h1>
           <p style="color:#8A8680;font-size:14px;margin-bottom:24px;">Инвестиционная платформа Чечни</p>
@@ -32,11 +26,15 @@ export async function sendVerificationCode(to: string, code: string) {
           <p style="color:#8A8680;font-size:13px;">Код действителен 10 минут. Если вы не запрашивали код — проигнорируйте это письмо.</p>
         </div>
       `,
-    })
+    }),
+  })
 
-    console.log(`[EMAIL] Sent successfully: ${info.messageId}`)
-  } catch (err) {
-    console.error(`[EMAIL] Failed to send:`, err)
-    throw err
+  if (!res.ok) {
+    const err = await res.text()
+    console.error(`[EMAIL] Brevo error:`, err)
+    throw new Error(`Email send failed: ${err}`)
   }
+
+  const data = await res.json()
+  console.log(`[EMAIL] Sent successfully: ${data.messageId}`)
 }
