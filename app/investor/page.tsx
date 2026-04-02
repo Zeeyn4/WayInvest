@@ -11,7 +11,7 @@ import {
   getInvestorDeals,
   getInvestorEvents,
 } from '@/actions/investor.actions'
-import { getChatList, getChatMessages, sendMessage } from '@/actions/chat.actions'
+import { getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
 type Panel = 'dashboard' | 'profile' | 'verify' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'deals'
 
@@ -115,6 +115,23 @@ export default function InvestorPage() {
   const { openModal, showToast } = useApp()
 
   const filters = ['Все', 'IT', 'Агротех', 'Финтех', 'Pre-seed', 'Seed']
+
+  // Start or open existing chat with a startup user
+  async function handleStartChat(partnerUserId: string) {
+    try {
+      const chatId = await startChat(partnerUserId)
+      setActivePanel('chat')
+      // Load chats then select the new one
+      const chats = await getChatList()
+      setChatList(chats)
+      setActiveChatId(chatId)
+      const msgs = await getChatMessages(chatId)
+      setChatMessages(msgs.map((m: any) => ({ id: m.id, text: m.content, mine: m.isMine, time: fmtTime(m.createdAt) })))
+      showToast('Чат открыт', '💬')
+    } catch {
+      showToast('Не удалось создать чат', '❌')
+    }
+  }
 
   // Load dashboard data on mount
   useEffect(() => {
@@ -561,9 +578,10 @@ export default function InvestorPage() {
                     <span className="sc-tag">ARR {fmtMoney(s.arrAmount)}</span>
                   </div>
                 </div>
-                <button className="btn btn-outline btn-sm" onClick={(e) => { e.stopPropagation(); showToast('NDA отправлено на подпись', '📝') }}>
-                  📝 NDA
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <button className="btn btn-outline btn-sm" onClick={(e) => { e.stopPropagation(); handleStartChat(s.userId) }}>💬 Написать</button>
+                  <button className="btn btn-gold btn-sm" onClick={(e) => { e.stopPropagation(); openModal('nda') }}>🔐 NDA</button>
+                </div>
               </div>
             ))
           )}
@@ -623,6 +641,10 @@ export default function InvestorPage() {
                       <div className="val" style={{ color: s.matchScore >= 80 ? 'var(--green)' : 'var(--gold)' }}>{s.matchScore}%</div>
                       <div className="key">Match</div>
                     </div>
+                  </div>
+                  <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
+                    <button className="btn btn-outline btn-sm" onClick={(e) => { e.stopPropagation(); handleStartChat(s.userId) }}>💬 Написать</button>
+                    <button className="btn btn-gold btn-sm" onClick={(e) => { e.stopPropagation(); openModal('nda') }}>🔐 NDA</button>
                   </div>
                 </div>
               ))}

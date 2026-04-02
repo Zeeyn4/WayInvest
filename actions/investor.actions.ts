@@ -208,6 +208,7 @@ export async function getStartupCatalog() {
 
   return startups.map((s, i) => ({
     id: s.id,
+    userId: s.userId,
     name: s.name,
     emoji: '\uD83D\uDE80', // placeholder
     sector: s.sector,

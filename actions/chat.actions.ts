@@ -92,6 +92,45 @@ export async function getChatMessages(chatId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Start Chat (or return existing one)
+// ---------------------------------------------------------------------------
+
+export async function startChat(partnerId: string) {
+  const session = await auth()
+  if (!session?.user) throw new Error('Unauthorized')
+  const userId = session.user.id
+
+  if (userId === partnerId) throw new Error('Cannot chat with yourself')
+
+  // Check if a 1-on-1 chat already exists between these users
+  const existingChat = await prisma.chat.findFirst({
+    where: {
+      isGroup: false,
+      AND: [
+        { members: { some: { userId } } },
+        { members: { some: { userId: partnerId } } },
+      ],
+    },
+  })
+
+  if (existingChat) {
+    return existingChat.id
+  }
+
+  // Create new chat
+  const chat = await prisma.chat.create({
+    data: {
+      isGroup: false,
+      members: {
+        create: [{ userId }, { userId: partnerId }],
+      },
+    },
+  })
+
+  return chat.id
+}
+
+// ---------------------------------------------------------------------------
 // Send Message
 // ---------------------------------------------------------------------------
 

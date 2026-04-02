@@ -12,7 +12,7 @@ import {
   getStartupEvents,
   getInvestorCatalog,
 } from '@/actions/startup.actions'
-import { getChatList, getChatMessages, sendMessage } from '@/actions/chat.actions'
+import { getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
 type Panel = 'dashboard' | 'profile' | 'project' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'tariff' | 'docs'
 
@@ -64,7 +64,23 @@ export default function StartupDashboard() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
-  const { openModal } = useApp()
+  const { openModal, showToast } = useApp()
+
+  // Start or open existing chat with an investor
+  async function handleStartChat(partnerUserId: string) {
+    try {
+      const chatId = await startChat(partnerUserId)
+      setActivePanel('chat')
+      const chats = await getChatList()
+      setChatList(chats)
+      setActiveChat(chatId)
+      const msgs = await getChatMessages(chatId)
+      setMessages(msgs)
+      showToast('Чат открыт', '💬')
+    } catch {
+      showToast('Не удалось создать чат', '❌')
+    }
+  }
 
   // Fetch profile on mount for header display
   useEffect(() => {
@@ -515,7 +531,7 @@ export default function StartupDashboard() {
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       <div style={{ color: 'var(--gold)', fontSize: '.8rem', marginBottom: '8px' }}>⭐ {inv.rating}</div>
-                      <button className="btn btn-gold btn-sm">Связаться</button>
+                      <button className="btn btn-gold btn-sm" onClick={() => handleStartChat(inv.userId)}>💬 Написать</button>
                     </div>
                   </div>
                 ))
@@ -576,7 +592,7 @@ export default function StartupDashboard() {
                           <div style={{ color: 'var(--text-dim)', fontSize: '.72rem' }}>Рейтинг</div>
                           <div className="fw-600" style={{ color: 'var(--gold)', fontSize: '.9rem' }}>⭐ {inv.rating}</div>
                         </div>
-                        <button className="btn btn-outline btn-sm">Подробнее</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => handleStartChat(inv.userId)}>💬 Написать</button>
                       </div>
                     </div>
                   ))

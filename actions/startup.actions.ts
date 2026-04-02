@@ -238,6 +238,7 @@ export async function getInvestorCatalog() {
 
   return investors.map((inv) => ({
     id: inv.id,
+    userId: inv.userId,
     name: inv.user.fullName,
     companyName: inv.companyName,
     sectorFocus: inv.sectorFocus,
