@@ -107,6 +107,7 @@ function RegisterModal() {
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const [savedEmail, setSavedEmail] = useState('')
+  const [savedFormData, setSavedFormData] = useState<FormData | null>(null)
   const [code, setCode] = useState('')
 
   function resetState() {
@@ -114,6 +115,7 @@ function RegisterModal() {
     setError('')
     setCode('')
     setSavedEmail('')
+    setSavedFormData(null)
   }
 
   // Step 1: Validate form & send code
@@ -126,6 +128,7 @@ function RegisterModal() {
     const formData = new FormData(form)
     const email = formData.get('email') as string
     setSavedEmail(email)
+    setSavedFormData(formData)
 
     startTransition(async () => {
       const result = await sendEmailCode(email)
@@ -142,6 +145,7 @@ function RegisterModal() {
   function handleVerifyAndRegister(formType: 'startup' | 'investor') {
     setError('')
     if (code.length !== 6) { setError('Введите 6-значный код'); return }
+    if (!savedFormData) { setError('Данные формы потеряны. Начните заново.'); return }
 
     startTransition(async () => {
       // Verify code
@@ -151,15 +155,10 @@ function RegisterModal() {
         return
       }
 
-      // Register
-      const formId = formType === 'startup' ? 'regStartupForm' : 'regInvestorForm'
-      const form = document.getElementById(formId) as HTMLFormElement
-      if (!form) return
-      const formData = new FormData(form)
-
+      // Register using saved form data
       const result = formType === 'startup'
-        ? await registerStartup(formData)
-        : await registerInvestor(formData)
+        ? await registerStartup(savedFormData)
+        : await registerInvestor(savedFormData)
 
       if (!result.success) {
         setError(result.error || 'Ошибка регистрации')
