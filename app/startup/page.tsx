@@ -179,11 +179,11 @@ export default function StartupDashboard() {
     if (!chatInput.trim() || !activeChat) return
     const optimisticMsg = {
       id: `temp-${Date.now()}`,
-      text: chatInput,
-      mine: true,
-      time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+      content: chatInput,
+      isMine: true,
+      createdAt: new Date().toISOString(),
     }
-    setMessages(prev => [...prev, optimisticMsg])
+    setMessages((prev: any[]) => [...prev, optimisticMsg])
     const content = chatInput
     setChatInput('')
     try {
@@ -620,9 +620,9 @@ export default function StartupDashboard() {
                       className={`chat-item${activeChat === c.chatId ? ' active' : ''}`}
                       onClick={() => handleChatSelect(c.chatId)}
                     >
-                      <div className="chat-item-name">{c.name}</div>
-                      <div className="chat-item-preview">{c.preview}</div>
-                      <div className="chat-item-time">{c.time}</div>
+                      <div className="chat-item-name">{c.chatName || c.partnerName}</div>
+                      <div className="chat-item-preview">{c.lastMessage?.content || 'Нет сообщений'}</div>
+                      <div className="chat-item-time">{c.lastMessage?.createdAt ? new Date(c.lastMessage.createdAt).toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'}) : ''}</div>
                     </div>
                   ))
                 )}
@@ -632,20 +632,20 @@ export default function StartupDashboard() {
                   <>
                     <div className="chat-header">
                       <div className="avatar" style={{ width: '34px', height: '34px', fontSize: '.8rem' }}>
-                        {activeChatData.name?.split(' ').map((w: string) => w[0]).join('') || '??'}
+                        {(activeChatData.chatName || activeChatData.partnerName || '??').split(' ').map((w: string) => w[0]).join('').slice(0,2)}
                       </div>
                       <div>
-                        <div className="fw-600" style={{ fontSize: '.9rem' }}>{activeChatData.name}</div>
-                        <div style={{ color: activeChatData.online ? 'var(--green)' : 'var(--text-dim)', fontSize: '.75rem' }}>
-                          {activeChatData.online ? '● Онлайн' : '○ Офлайн'}
+                        <div className="fw-600" style={{ fontSize: '.9rem' }}>{activeChatData.chatName || activeChatData.partnerName}</div>
+                        <div style={{ color: 'var(--text-dim)', fontSize: '.75rem' }}>
+                          {activeChatData.partnerRole === 'INVESTOR' ? '● Верифицированный инвестор' : '● Стартап'}
                         </div>
                       </div>
                     </div>
                     <div className="chat-messages">
                       {messages.map((msg: any) => (
-                        <div key={msg.id} className={`msg${msg.mine ? ' mine' : ' theirs'}`}>
-                          <div className="msg-bubble">{msg.text}</div>
-                          <div className="msg-time">{msg.time}</div>
+                        <div key={msg.id} className={`msg${msg.isMine ? ' mine' : ' theirs'}`}>
+                          <div className="msg-bubble">{msg.content}</div>
+                          <div className="msg-time">{msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'}) : ''}</div>
                         </div>
                       ))}
                       <div ref={messagesEndRef} />
