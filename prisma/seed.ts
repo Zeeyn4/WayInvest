@@ -402,7 +402,99 @@ async function main() {
   }
 
   // ============================================================
-  // 7. EVENTS
+  // 7. CHATS & MESSAGES (from prototype)
+  // ============================================================
+  const existingChats = await prisma.chat.count()
+  if (existingChats === 0) {
+    // Chat: Алихан (startup1) <-> Рустам (inv1)
+    const chat1 = await prisma.chat.create({
+      data: {
+        name: null,
+        isGroup: false,
+        members: { create: [{ userId: startup1User.id }, { userId: inv1User.id }] },
+      },
+    })
+    await prisma.message.createMany({
+      data: [
+        { chatId: chat1.id, senderId: inv1User.id, content: 'Добрый день! Ознакомился с вашим питч-деком. Очень интересная концепция для локального рынка.', createdAt: new Date('2024-12-15T14:18:00') },
+        { chatId: chat1.id, senderId: startup1User.id, content: 'Спасибо большое! Рады вашему интересу. Чем могу быть полезен?', createdAt: new Date('2024-12-15T14:20:00') },
+        { chatId: chat1.id, senderId: inv1User.id, content: 'Меня интересует раунд A. Каков ваш текущий ARR и планы на масштабирование?', createdAt: new Date('2024-12-15T14:22:00') },
+      ],
+    })
+
+    // Chat: Алихан (startup1) <-> Магомед (inv2)
+    const chat2 = await prisma.chat.create({
+      data: {
+        name: null,
+        isGroup: false,
+        members: { create: [{ userId: startup1User.id }, { userId: inv2User.id }] },
+      },
+    })
+    await prisma.message.createMany({
+      data: [
+        { chatId: chat2.id, senderId: inv2User.id, content: 'Пришлите финансовую модель, пожалуйста.', createdAt: new Date('2024-12-14T10:00:00') },
+        { chatId: chat2.id, senderId: startup1User.id, content: 'Добрый день! Финансовая модель доступна после подписания NDA.', createdAt: new Date('2024-12-14T10:15:00') },
+      ],
+    })
+
+    // Chat: Алихан (startup1) <-> Зулай (inv3)
+    const chat3 = await prisma.chat.create({
+      data: {
+        name: null,
+        isGroup: false,
+        members: { create: [{ userId: startup1User.id }, { userId: inv3User.id }] },
+      },
+    })
+    await prisma.message.createMany({
+      data: [
+        { chatId: chat3.id, senderId: inv3User.id, content: 'Когда следующий питч-день?', createdAt: new Date('2024-12-13T09:00:00') },
+      ],
+    })
+
+    // Group chat: IT Стартапы ЧР
+    await prisma.chat.create({
+      data: {
+        name: 'IT Стартапы ЧР',
+        isGroup: true,
+        members: { create: [{ userId: startup1User.id }, { userId: startup3User.id }, { userId: inv1User.id }] },
+      },
+    })
+
+    // Chat: Рустам (inv1) <-> ГрозАгро (startup2)
+    const chat5 = await prisma.chat.create({
+      data: {
+        name: null,
+        isGroup: false,
+        members: { create: [{ userId: inv1User.id }, { userId: startup2User.id }] },
+      },
+    })
+    await prisma.message.createMany({
+      data: [
+        { chatId: chat5.id, senderId: startup2User.id, content: 'Добрый день, Рустам! Спасибо за интерес к нашему проекту.', createdAt: new Date('2024-12-15T14:20:00') },
+        { chatId: chat5.id, senderId: inv1User.id, content: 'Добрый! Изучил ваш питч-дек. Впечатляет тяга. Какой runway у вас сейчас?', createdAt: new Date('2024-12-15T14:23:00') },
+      ],
+    })
+
+    console.log('Chats & messages seeded.')
+  }
+
+  // ============================================================
+  // 8. DOCUMENTS (mock files from prototype)
+  // ============================================================
+  const existingDocs = await prisma.document.count()
+  if (existingDocs === 0) {
+    await prisma.document.createMany({
+      data: [
+        { startupId: startup1.id, fileName: 'PitchDeck_ТехЧечня_2024.pdf', fileUrl: '/uploads/pitchdeck.pdf', fileSizeMb: 4.2, accessLevel: 'public' },
+        { startupId: startup1.id, fileName: 'Финансовая_модель_2025.xlsx', fileUrl: '/uploads/finmodel.xlsx', fileSizeMb: 1.8, accessLevel: 'premium' },
+        { startupId: startup1.id, fileName: 'Устав_компании.pdf', fileUrl: '/uploads/charter.pdf', fileSizeMb: 2.1, accessLevel: 'nda' },
+      ],
+    })
+    console.log('Documents seeded.')
+  }
+
+  // ============================================================
+  // 9. EVENTS
   // ============================================================
   const existingEvents = await prisma.event.count()
   if (existingEvents === 0) {
