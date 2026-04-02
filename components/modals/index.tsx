@@ -6,6 +6,25 @@ import { useApp } from '@/components/providers/app-provider'
 import { registerStartup, registerInvestor, loginUser, sendEmailCode, verifyEmailCode } from '@/actions/auth.actions'
 
 /* ------------------------------------------------------------------ */
+/*  Password input with toggle                                         */
+/* ------------------------------------------------------------------ */
+function PasswordInput({ name = 'password', placeholder = '••••••••', required = true, minLength }: { name?: string; placeholder?: string; required?: boolean; minLength?: number }) {
+  const [show, setShow] = useState(false)
+  return (
+    <div style={{ position: 'relative' }}>
+      <input name={name} type={show ? 'text' : 'password'} placeholder={placeholder} required={required} minLength={minLength} style={{ paddingRight: 44 }} />
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '1.1rem', padding: 4 }}
+      >
+        {show ? '🙈' : '👁️'}
+      </button>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /*  Shared overlay wrapper                                             */
 /* ------------------------------------------------------------------ */
 function Overlay({ id, children, style }: { id: string; children: React.ReactNode; style?: React.CSSProperties }) {
@@ -63,7 +82,7 @@ function LoginModal() {
       </div>
       <form id="loginForm" onSubmit={(e) => { e.preventDefault(); handleLogin() }}>
         <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="example@mail.ru" required /></div>
-        <div className="form-group"><label>Пароль</label><input name="password" type="password" placeholder="••••••••" required /></div>
+        <div className="form-group"><label>Пароль</label><PasswordInput /></div>
         {error && <div style={{ color: 'var(--red)', fontSize: '.85rem', marginBottom: 16 }}>{error}</div>}
         <button type="submit" className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} disabled={isPending}>
           {isPending ? 'Входим...' : 'Войти'}
@@ -187,7 +206,7 @@ function RegisterModal() {
               <div className="form-group"><label>Название стартапа</label><input name="startupName" placeholder="ТехЧечня" required /></div>
               <div className="form-group"><label>ФИО основателя</label><input name="fullName" placeholder="Алихан Мусаев" required /></div>
               <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="founder@startup.ru" required /></div>
-              <div className="form-group"><label>Пароль</label><input name="password" type="password" placeholder="••••••••" required minLength={6} /></div>
+              <div className="form-group"><label>Пароль</label><PasswordInput minLength={6} /></div>
               <div className="form-group">
                 <label>Отрасль</label>
                 <select name="sector">
@@ -222,7 +241,7 @@ function RegisterModal() {
             <form id="regInvestorForm" onSubmit={(e) => { e.preventDefault(); handleSendCode('investor') }}>
               <div className="form-group"><label>ФИО</label><input name="fullName" placeholder="Рустам Бекмурзаев" required /></div>
               <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="investor@mail.ru" required /></div>
-              <div className="form-group"><label>Пароль</label><input name="password" type="password" placeholder="••••••••" required minLength={6} /></div>
+              <div className="form-group"><label>Пароль</label><PasswordInput minLength={6} /></div>
               <div style={{ background: 'rgba(231,76,60,.08)', border: '1px solid rgba(231,76,60,.2)', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.82rem', color: 'var(--text-dim)' }}>
                 ⚠️ До прохождения верификации администратором вы не можете просматривать стартапы, писать им или заключать сделки.<br /><br />
                 Комиссия платформы составляет <strong style={{ color: 'var(--gold)' }}>8%</strong> от суммы инвестиций. Данный размер фиксирован и не может быть оспорен.
