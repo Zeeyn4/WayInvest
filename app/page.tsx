@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useApp } from '@/components/providers/app-provider'
 import { useRouter } from 'next/navigation'
 
@@ -8,12 +9,14 @@ function scrollTo(id: string) {
 }
 
 export default function Home() {
+  const [mobileNav, setMobileNav] = useState(false)
   const { openModal } = useApp()
   const router = useRouter()
 
   return (
     <div>
       {/* NAV */}
+      <div style={{position:'relative'}}>
       <nav className="nav">
         <div className="nav-logo" onClick={() => window.scrollTo(0, 0)} style={{ cursor: 'pointer' }}>
           Way<span>Invest</span>
@@ -28,7 +31,19 @@ export default function Home() {
           <button className="btn btn-outline btn-sm" onClick={() => openModal('login')}>Войти</button>
           <button className="btn btn-gold btn-sm" onClick={() => openModal('register')}>Регистрация</button>
         </div>
+        <button className="burger-btn" onClick={() => setMobileNav(!mobileNav)}>
+          {mobileNav ? '✕' : '☰'}
+        </button>
       </nav>
+      <div className={`nav-mobile${mobileNav ? ' active' : ''}`}>
+        <a className="nav-link" onClick={() => { scrollTo('about'); setMobileNav(false) }}>О платформе</a>
+        <a className="nav-link" onClick={() => { scrollTo('packages'); setMobileNav(false) }}>Тарифы</a>
+        <a className="nav-link" onClick={() => { scrollTo('how'); setMobileNav(false) }}>Как это работает</a>
+        <a className="nav-link" onClick={() => { scrollTo('safety'); setMobileNav(false) }}>Безопасность</a>
+        <button className="btn btn-outline btn-sm" style={{width:'100%'}} onClick={() => { openModal('login'); setMobileNav(false) }}>Войти</button>
+        <button className="btn btn-gold btn-sm" style={{width:'100%'}} onClick={() => { openModal('register'); setMobileNav(false) }}>Регистрация</button>
+      </div>
+      </div>
 
       {/* HERO */}
       <section className="hero">

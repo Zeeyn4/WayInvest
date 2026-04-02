@@ -74,6 +74,7 @@ function timeAgo(iso: string | null): string {
 
 export default function AdminPage() {
   const [activePanel, setActivePanel] = useState<Panel>('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const router = useRouter()
@@ -141,7 +142,8 @@ export default function AdminPage() {
   return (
     <div className="dash-layout">
       {/* Sidebar */}
-      <aside className="sidebar">
+      {sidebarOpen && <div className="sidebar-overlay active" onClick={() => setSidebarOpen(false)} />}
+      <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="sidebar-logo" onClick={() => router.push('/')}>
           Way<span>Invest</span>
         </div>
@@ -153,25 +155,25 @@ export default function AdminPage() {
         <div className="sidebar-section">Управление</div>
         <div
           className={`sidebar-item ${activePanel === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActivePanel('dashboard')}
+          onClick={() => { setActivePanel('dashboard'); setSidebarOpen(false) }}
         >
           <span className="icon">📊</span> Обзор
         </div>
         <div
           className={`sidebar-item ${activePanel === 'verify' ? 'active' : ''}`}
-          onClick={() => setActivePanel('verify')}
+          onClick={() => { setActivePanel('verify'); setSidebarOpen(false) }}
         >
           <span className="icon">✅</span> Верификация
         </div>
         <div
           className={`sidebar-item ${activePanel === 'startups' ? 'active' : ''}`}
-          onClick={() => setActivePanel('startups')}
+          onClick={() => { setActivePanel('startups'); setSidebarOpen(false) }}
         >
           <span className="icon">🚀</span> Стартапы
         </div>
         <div
           className={`sidebar-item ${activePanel === 'investors' ? 'active' : ''}`}
-          onClick={() => setActivePanel('investors')}
+          onClick={() => { setActivePanel('investors'); setSidebarOpen(false) }}
         >
           <span className="icon">💼</span> Инвесторы
         </div>
@@ -179,19 +181,19 @@ export default function AdminPage() {
         <div className="sidebar-section">Система</div>
         <div
           className={`sidebar-item ${activePanel === 'events' ? 'active' : ''}`}
-          onClick={() => setActivePanel('events')}
+          onClick={() => { setActivePanel('events'); setSidebarOpen(false) }}
         >
           <span className="icon">📅</span> Мероприятия
         </div>
         <div
           className={`sidebar-item ${activePanel === 'commissions' ? 'active' : ''}`}
-          onClick={() => setActivePanel('commissions')}
+          onClick={() => { setActivePanel('commissions'); setSidebarOpen(false) }}
         >
           <span className="icon">💰</span> Комиссии
         </div>
         <div
           className={`sidebar-item ${activePanel === 'tariffs' ? 'active' : ''}`}
-          onClick={() => setActivePanel('tariffs')}
+          onClick={() => { setActivePanel('tariffs'); setSidebarOpen(false) }}
         >
           <span className="icon">📦</span> Тарифы
         </div>
@@ -199,7 +201,7 @@ export default function AdminPage() {
         <div className="sidebar-section" />
         <div
           className="sidebar-item"
-          onClick={() => router.push('/')}
+          onClick={() => { router.push('/'); setSidebarOpen(false) }}
         >
           <span className="icon">🚪</span> Выйти
         </div>
@@ -208,6 +210,7 @@ export default function AdminPage() {
       {/* Main content */}
       <main className="dash-main">
         <div className="dash-header">
+          <button className="burger-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{marginRight:12}}>☰</button>
           <h1>{panelTitles[activePanel]}</h1>
           <div className="dash-user">
             <button className="notif-btn">

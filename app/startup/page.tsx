@@ -30,6 +30,7 @@ const panelTitles: Record<Panel, string> = {
 
 export default function StartupDashboard() {
   const [activePanel, setActivePanel] = useState<Panel>('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
   // Dashboard data
@@ -209,46 +210,47 @@ export default function StartupDashboard() {
   return (
     <div className="dash-layout">
       {/* Sidebar */}
-      <div className="sidebar">
+      {sidebarOpen && <div className="sidebar-overlay active" onClick={() => setSidebarOpen(false)} />}
+      <div className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="sidebar-logo" onClick={() => router.push('/')}>Way<span>Invest</span></div>
 
         <div className="sidebar-section">Основное</div>
-        <div className={`sidebar-item${activePanel === 'dashboard' ? ' active' : ''}`} onClick={() => setActivePanel('dashboard')}>
+        <div className={`sidebar-item${activePanel === 'dashboard' ? ' active' : ''}`} onClick={() => { setActivePanel('dashboard'); setSidebarOpen(false) }}>
           <span className="icon">📊</span> Дашборд
         </div>
-        <div className={`sidebar-item${activePanel === 'profile' ? ' active' : ''}`} onClick={() => setActivePanel('profile')}>
+        <div className={`sidebar-item${activePanel === 'profile' ? ' active' : ''}`} onClick={() => { setActivePanel('profile'); setSidebarOpen(false) }}>
           <span className="icon">👤</span> Мой профиль
         </div>
-        <div className={`sidebar-item${activePanel === 'project' ? ' active' : ''}`} onClick={() => setActivePanel('project')}>
+        <div className={`sidebar-item${activePanel === 'project' ? ' active' : ''}`} onClick={() => { setActivePanel('project'); setSidebarOpen(false) }}>
           <span className="icon">📁</span> Мой проект
         </div>
 
         <div className="sidebar-section">Инвесторы</div>
-        <div className={`sidebar-item${activePanel === 'aiMatch' ? ' active' : ''}`} onClick={() => setActivePanel('aiMatch')}>
+        <div className={`sidebar-item${activePanel === 'aiMatch' ? ' active' : ''}`} onClick={() => { setActivePanel('aiMatch'); setSidebarOpen(false) }}>
           <span className="icon">🤖</span> AI-подбор
         </div>
-        <div className={`sidebar-item${activePanel === 'catalog' ? ' active' : ''}`} onClick={() => setActivePanel('catalog')}>
+        <div className={`sidebar-item${activePanel === 'catalog' ? ' active' : ''}`} onClick={() => { setActivePanel('catalog'); setSidebarOpen(false) }}>
           <span className="icon">📋</span> Каталог инвесторов
         </div>
 
         <div className="sidebar-section">Коммуникации</div>
-        <div className={`sidebar-item${activePanel === 'chat' ? ' active' : ''}`} onClick={() => setActivePanel('chat')}>
+        <div className={`sidebar-item${activePanel === 'chat' ? ' active' : ''}`} onClick={() => { setActivePanel('chat'); setSidebarOpen(false) }}>
           <span className="icon">💬</span> Чаты
         </div>
-        <div className={`sidebar-item${activePanel === 'events' ? ' active' : ''}`} onClick={() => setActivePanel('events')}>
+        <div className={`sidebar-item${activePanel === 'events' ? ' active' : ''}`} onClick={() => { setActivePanel('events'); setSidebarOpen(false) }}>
           <span className="icon">📅</span> Мероприятия
         </div>
 
         <div className="sidebar-section">Настройки</div>
-        <div className={`sidebar-item${activePanel === 'tariff' ? ' active' : ''}`} onClick={() => setActivePanel('tariff')}>
+        <div className={`sidebar-item${activePanel === 'tariff' ? ' active' : ''}`} onClick={() => { setActivePanel('tariff'); setSidebarOpen(false) }}>
           <span className="icon">💎</span> Тариф
         </div>
-        <div className={`sidebar-item${activePanel === 'docs' ? ' active' : ''}`} onClick={() => setActivePanel('docs')}>
+        <div className={`sidebar-item${activePanel === 'docs' ? ' active' : ''}`} onClick={() => { setActivePanel('docs'); setSidebarOpen(false) }}>
           <span className="icon">📄</span> Документы
         </div>
 
         <div style={{ padding: '20px 24px', marginTop: '20px', borderTop: '1px solid var(--border)' }}>
-          <button className="btn btn-danger btn-sm" style={{ width: '100%' }} onClick={() => router.push('/')}>
+          <button className="btn btn-danger btn-sm" style={{ width: '100%' }} onClick={() => { router.push('/'); setSidebarOpen(false) }}>
             🚪 Выйти
           </button>
         </div>
@@ -257,6 +259,7 @@ export default function StartupDashboard() {
       {/* Main */}
       <div className="dash-main">
         <div className="dash-header">
+          <button className="burger-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{marginRight:12}}>☰</button>
           <h1>{panelTitles[activePanel]}</h1>
           <div className="dash-user">
             <button className="notif-btn">🔔<span className="notif-dot"></span></button>

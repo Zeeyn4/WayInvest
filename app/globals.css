@@ -303,4 +303,143 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); c
 /* Ensure dark background everywhere */
 html, body { background: var(--dark) !important; color: var(--text) !important; }
 
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+
+/* Burger menu button */
+.burger-btn { display:none; background:none; border:none; color:var(--text); font-size:1.5rem; cursor:pointer; padding:8px; }
+
+/* Mobile sidebar overlay */
+.sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:49; }
+.sidebar-overlay.active { display:block; }
+
+/* ---- Tablet: <= 1024px ---- */
+@media (max-width:1024px) {
+  .grid-4 { grid-template-columns:repeat(2,1fr); }
+  .grid-3 { grid-template-columns:repeat(2,1fr); }
+  .footer-grid { grid-template-columns:1fr 1fr; gap:24px; }
+  .section { padding:48px 20px; }
+  .nav { padding:14px 20px; }
+  .hero h1 { font-size:clamp(2rem,5vw,3.5rem); }
+  .floating-card { display:none; }
+  .pkg-card { padding:24px 20px; }
+}
+
+/* ---- Mobile: <= 768px ---- */
+@media (max-width:768px) {
+  /* Nav */
+  .nav-links { display:none; }
+  .burger-btn { display:block; }
+  .nav-actions { gap:8px; }
+  .nav-actions .btn { padding:8px 14px !important; font-size:.8rem !important; }
+  .nav { padding:12px 16px; }
+
+  /* Mobile nav dropdown */
+  .nav-mobile { display:none; position:absolute; top:100%; left:0; right:0; background:var(--dark2); border-bottom:1px solid var(--border); padding:16px; z-index:99; flex-direction:column; gap:12px; }
+  .nav-mobile.active { display:flex; }
+  .nav-mobile .nav-link { padding:10px 0; font-size:1rem; }
+
+  /* Hero */
+  .hero { padding:80px 16px 40px; min-height:auto; }
+  .hero h1 { font-size:2rem; }
+  .hero p { font-size:.95rem; }
+  .hero-btns { flex-direction:column; width:100%; }
+  .hero-btns .btn { width:100%; justify-content:center; }
+  .floating-card { display:none; }
+
+  /* Grids */
+  .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+
+  /* Sections */
+  .section { padding:40px 16px; }
+  .section-title { font-size:1.6rem; }
+
+  /* Packages */
+  .pkg-card { padding:24px 18px; }
+  .pkg-price { font-size:1.5rem; }
+
+  /* Footer */
+  .footer-grid { grid-template-columns:1fr; gap:24px; }
+  footer { padding:32px 16px 16px; }
+
+  /* Dashboard layout */
+  .sidebar { position:fixed; left:-280px; transition:left .3s ease; z-index:50; width:260px; }
+  .sidebar.open { left:0; }
+  .dash-main { margin-left:0; padding:16px; }
+  .dash-header { flex-direction:column; gap:12px; align-items:flex-start; }
+  .dash-header h1 { font-size:1.4rem; }
+  .dash-user { width:100%; justify-content:flex-end; }
+
+  /* Stat boxes */
+  .stat-box .num { font-size:1.4rem; }
+  .stat-box { padding:14px; }
+
+  /* Profile */
+  .profile-header { flex-direction:column; padding:20px; }
+  .profile-avatar { width:60px; height:60px; font-size:1.5rem; }
+  .profile-stats { gap:16px; flex-wrap:wrap; }
+
+  /* Cards */
+  .card { padding:18px; }
+
+  /* Chat */
+  .chat-layout { flex-direction:column; height:auto; min-height:calc(100vh - 200px); }
+  .chat-list { width:100%; max-height:200px; border-right:none; border-bottom:1px solid var(--border); }
+  .chat-main { min-height:400px; }
+  .chat-messages { padding:12px; }
+  .msg { max-width:85%; }
+  .chat-input-area { padding:10px 12px; }
+
+  /* AI Match */
+  .ai-match-card { flex-direction:column; align-items:flex-start; gap:12px; padding:16px; }
+  .match-score { align-self:center; }
+
+  /* Tables */
+  .data-table { font-size:.78rem; }
+  .data-table th, .data-table td { padding:8px 10px; }
+
+  /* Modals */
+  .modal { padding:24px 18px; width:95%; max-width:none; margin:10px; }
+  .modal h2 { font-size:1.3rem; }
+
+  /* Admin stat */
+  .admin-stat { padding:14px 16px; }
+  .admin-stat-info .val { font-size:1.2rem; }
+
+  /* Startup card */
+  .sc-metrics { flex-wrap:wrap; gap:12px; }
+  .sc-metric { flex:1; min-width:60px; }
+
+  /* Event cards */
+  .event-banner { height:90px; font-size:2rem; }
+
+  /* Search */
+  .search-bar { flex-direction:column; }
+  .filter-row { flex-wrap:wrap; }
+
+  /* Commission notice */
+  .commission-notice { font-size:.8rem; padding:12px 14px; }
+
+  /* Verify banner */
+  .verify-banner { flex-direction:column; text-align:center; padding:14px; }
+}
+
+/* ---- Small mobile: <= 480px ---- */
+@media (max-width:480px) {
+  .hero h1 { font-size:1.6rem; }
+  .hero-badge { font-size:.7rem; }
+  .nav-logo { font-size:1.2rem; }
+  .btn { padding:10px 18px; font-size:.85rem; }
+  .tabs { flex-direction:row; }
+  .tab { font-size:.8rem; padding:8px 4px; }
+  .modal { padding:20px 14px; }
+  .stat-box .num { font-size:1.2rem; }
+  .pkg-card { padding:18px 14px; }
+  .form-group label { font-size:.78rem; }
+  input, select, textarea { font-size:.88rem !important; padding:10px 12px !important; }
+  .dash-header h1 { font-size:1.2rem; }
+  .data-table { display:block; overflow-x:auto; white-space:nowrap; }
+}
+
 /* end of styles */

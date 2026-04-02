@@ -91,6 +91,7 @@ interface ChatItem {
 
 export default function InvestorPage() {
   const [activePanel, setActivePanel] = useState<Panel>('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState('Все')
   const [loading, setLoading] = useState(true)
@@ -203,7 +204,8 @@ export default function InvestorPage() {
   return (
     <div className="dash-layout">
       {/* Sidebar */}
-      <aside className="sidebar">
+      {sidebarOpen && <div className="sidebar-overlay active" onClick={() => setSidebarOpen(false)} />}
+      <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="sidebar-logo" onClick={() => router.push('/')}>
           Way<span>Invest</span>
         </div>
@@ -223,19 +225,19 @@ export default function InvestorPage() {
         <div className="sidebar-section">Основное</div>
         <div
           className={`sidebar-item ${activePanel === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActivePanel('dashboard')}
+          onClick={() => { setActivePanel('dashboard'); setSidebarOpen(false) }}
         >
           <span className="icon">📊</span> Дашборд
         </div>
         <div
           className={`sidebar-item ${activePanel === 'profile' ? 'active' : ''}`}
-          onClick={() => setActivePanel('profile')}
+          onClick={() => { setActivePanel('profile'); setSidebarOpen(false) }}
         >
           <span className="icon">👤</span> Мой профиль
         </div>
         <div
           className={`sidebar-item ${activePanel === 'verify' ? 'active' : ''}`}
-          onClick={() => setActivePanel('verify')}
+          onClick={() => { setActivePanel('verify'); setSidebarOpen(false) }}
         >
           <span className="icon">🛡️</span> Верификация
         </div>
@@ -243,13 +245,13 @@ export default function InvestorPage() {
         <div className="sidebar-section">Стартапы</div>
         <div
           className={`sidebar-item ${activePanel === 'aiMatch' ? 'active' : ''}`}
-          onClick={() => setActivePanel('aiMatch')}
+          onClick={() => { setActivePanel('aiMatch'); setSidebarOpen(false) }}
         >
           <span className="icon">🤖</span> AI-подбор
         </div>
         <div
           className={`sidebar-item ${activePanel === 'catalog' ? 'active' : ''}`}
-          onClick={() => setActivePanel('catalog')}
+          onClick={() => { setActivePanel('catalog'); setSidebarOpen(false) }}
         >
           <span className="icon">📋</span> Каталог стартапов
         </div>
@@ -257,13 +259,13 @@ export default function InvestorPage() {
         <div className="sidebar-section">Коммуникации</div>
         <div
           className={`sidebar-item ${activePanel === 'chat' ? 'active' : ''}`}
-          onClick={() => setActivePanel('chat')}
+          onClick={() => { setActivePanel('chat'); setSidebarOpen(false) }}
         >
           <span className="icon">💬</span> Чаты
         </div>
         <div
           className={`sidebar-item ${activePanel === 'events' ? 'active' : ''}`}
-          onClick={() => setActivePanel('events')}
+          onClick={() => { setActivePanel('events'); setSidebarOpen(false) }}
         >
           <span className="icon">📅</span> Мероприятия
         </div>
@@ -271,13 +273,13 @@ export default function InvestorPage() {
         <div className="sidebar-section">Сделки</div>
         <div
           className={`sidebar-item ${activePanel === 'deals' ? 'active' : ''}`}
-          onClick={() => setActivePanel('deals')}
+          onClick={() => { setActivePanel('deals'); setSidebarOpen(false) }}
         >
           <span className="icon">🤝</span> Мои сделки
         </div>
 
         <div className="sidebar-section" />
-        <div className="sidebar-item" onClick={() => router.push('/')}>
+        <div className="sidebar-item" onClick={() => { router.push('/'); setSidebarOpen(false) }}>
           <span className="icon">🚪</span> Выйти
         </div>
       </aside>
@@ -285,6 +287,7 @@ export default function InvestorPage() {
       {/* Main content */}
       <main className="dash-main">
         <div className="dash-header">
+          <button className="burger-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{marginRight:12}}>☰</button>
           <h1>{panelTitles[activePanel]}</h1>
           <div className="dash-user">
             <button className="notif-btn">
