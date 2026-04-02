@@ -1,5 +1,3 @@
-@import "tailwindcss";
-
 /* ============================================================
    WayInvest — Global Styles (from prototype.html)
    ============================================================ */
@@ -275,3 +273,15 @@ footer { background:var(--dark2); border-top:1px solid var(--border); padding:48
 .text-green { color:var(--green); }
 .text-red { color:var(--red); }
 .fw-600 { font-weight:600; }
+
+/* PLACEHOLDER — dim color so it's clearly not real text */
+::placeholder { color: #5A5650 !important; -webkit-text-fill-color: #5A5650 !important; opacity: 1; }
+input::placeholder, textarea::placeholder { color: #5A5650 !important; -webkit-text-fill-color: #5A5650 !important; }
+
+/* Fix checkbox styling */
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer; }
+
+/* Ensure dark background everywhere */
+html, body { background: var(--dark) !important; color: var(--text) !important; }
+
+/* end of styles */
