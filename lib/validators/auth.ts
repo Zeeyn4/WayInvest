@@ -12,8 +12,6 @@ export const registerInvestorSchema = z.object({
   fullName: z.string().min(2, 'Минимум 2 символа'),
   email: z.string().email('Некорректный email'),
   password: z.string().min(6, 'Минимум 6 символов'),
-  companyName: z.string().min(2, 'Укажите ИП / ООО'),
-  ogrn: z.string().min(5, 'Укажите ОГРНИП / ОГРН'),
 })
 
 export const loginSchema = z.object({

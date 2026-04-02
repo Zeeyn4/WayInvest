@@ -29,6 +29,7 @@ model User {
   passwordHash   String   @map("password_hash")
   role           Role
   fullName       String   @map("full_name")
+  emailVerified  Boolean  @default(false) @map("email_verified")
   isActive       Boolean  @default(true) @map("is_active")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -42,6 +43,18 @@ model User {
   eventRegistrations EventRegistration[]
 
   @@map("users")
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email, code])
+  @@map("email_verifications")
 }
 
 // ============================================================

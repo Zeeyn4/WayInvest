@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/components/providers/app-provider'
-import { registerStartup, registerInvestor, loginUser } from '@/actions/auth.actions'
+import { registerStartup, registerInvestor, loginUser, sendEmailCode, verifyEmailCode } from '@/actions/auth.actions'
 
 /* ------------------------------------------------------------------ */
 /*  Shared overlay wrapper                                             */
@@ -84,114 +84,198 @@ function RegisterModal() {
   const { closeModal, openModal, showToast } = useApp()
   const router = useRouter()
   const [tab, setTab] = useState(0)
+  const [step, setStep] = useState<'form' | 'code'>('form')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const [savedEmail, setSavedEmail] = useState('')
+  const [code, setCode] = useState('')
 
-  function handleStartupReg() {
+  function resetState() {
+    setStep('form')
     setError('')
-    const form = document.getElementById('regStartupForm') as HTMLFormElement
-    if (!form) return
+    setCode('')
+    setSavedEmail('')
+  }
+
+  // Step 1: Validate form & send code
+  function handleSendCode(formType: 'startup' | 'investor') {
+    setError('')
+    const formId = formType === 'startup' ? 'regStartupForm' : 'regInvestorForm'
+    const form = document.getElementById(formId) as HTMLFormElement
+    if (!form || !form.checkValidity()) { form?.reportValidity(); return }
+
     const formData = new FormData(form)
+    const email = formData.get('email') as string
+    setSavedEmail(email)
 
     startTransition(async () => {
-      const result = await registerStartup(formData)
+      const result = await sendEmailCode(email)
+      if (!result.success) {
+        setError(result.error || 'Ошибка отправки кода')
+        return
+      }
+      setStep('code')
+      showToast(`Код отправлен на ${email}`, '📧')
+    })
+  }
+
+  // Step 2: Verify code & register
+  function handleVerifyAndRegister(formType: 'startup' | 'investor') {
+    setError('')
+    if (code.length !== 6) { setError('Введите 6-значный код'); return }
+
+    startTransition(async () => {
+      // Verify code
+      const verifyResult = await verifyEmailCode(savedEmail, code)
+      if (!verifyResult.success) {
+        setError(verifyResult.error || 'Неверный код')
+        return
+      }
+
+      // Register
+      const formId = formType === 'startup' ? 'regStartupForm' : 'regInvestorForm'
+      const form = document.getElementById(formId) as HTMLFormElement
+      if (!form) return
+      const formData = new FormData(form)
+
+      const result = formType === 'startup'
+        ? await registerStartup(formData)
+        : await registerInvestor(formData)
+
       if (!result.success) {
         setError(result.error || 'Ошибка регистрации')
         return
       }
+
       closeModal()
-      showToast('Стартап зарегистрирован! Добро пожаловать!', '🚀')
-      router.push(result.redirect || '/startup')
+      resetState()
+      if (formType === 'startup') {
+        showToast('Стартап зарегистрирован! Добро пожаловать!', '🚀')
+      } else {
+        showToast('Регистрация прошла успешно!', '📋')
+      }
+      router.push(result.redirect || '/')
       router.refresh()
     })
   }
 
-  function handleInvestorReg() {
-    setError('')
-    const form = document.getElementById('regInvestorForm') as HTMLFormElement
-    if (!form) return
-    const formData = new FormData(form)
-
+  // Resend code
+  function handleResend() {
     startTransition(async () => {
-      const result = await registerInvestor(formData)
-      if (!result.success) {
-        setError(result.error || 'Ошибка регистрации')
-        return
-      }
-      closeModal()
-      showToast('Регистрация отправлена на верификацию!', '📋')
-      router.push(result.redirect || '/investor')
-      router.refresh()
+      const result = await sendEmailCode(savedEmail)
+      if (result.success) showToast('Код отправлен повторно', '📧')
+      else setError(result.error || 'Ошибка')
     })
   }
 
   return (
     <Overlay id="register">
       <h2>Регистрация</h2>
-      <div className="tabs">
-        <button className={`tab${tab === 0 ? ' active' : ''}`} onClick={() => { setTab(0); setError('') }}>Стартап</button>
-        <button className={`tab${tab === 1 ? ' active' : ''}`} onClick={() => { setTab(1); setError('') }}>Инвестор</button>
-      </div>
 
-      {error && <div style={{ color: 'var(--red)', fontSize: '.85rem', marginBottom: 16 }}>{error}</div>}
+      {step === 'form' && (
+        <>
+          <div className="tabs">
+            <button className={`tab${tab === 0 ? ' active' : ''}`} onClick={() => { setTab(0); setError('') }}>Стартап</button>
+            <button className={`tab${tab === 1 ? ' active' : ''}`} onClick={() => { setTab(1); setError('') }}>Инвестор</button>
+          </div>
 
-      {/* Startup form */}
-      {tab === 0 && (
-        <form id="regStartupForm" onSubmit={(e) => { e.preventDefault(); handleStartupReg() }}>
-          <div className="form-group"><label>Название стартапа</label><input name="startupName" placeholder="ТехЧечня" required /></div>
-          <div className="form-group"><label>ФИО основателя</label><input name="fullName" placeholder="Алихан Мусаев" required /></div>
-          <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="founder@startup.ru" required /></div>
-          <div className="form-group"><label>Пароль</label><input name="password" type="password" placeholder="••••••••" required minLength={6} /></div>
-          <div className="form-group">
-            <label>Отрасль</label>
-            <select name="sector">
-              <option>IT / Технологии</option>
-              <option>Агротех</option>
-              <option>Финтех</option>
-              <option>Логистика</option>
-              <option>Ритейл</option>
-            </select>
-          </div>
-          <div style={{ background: 'rgba(201,168,76,.08)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.82rem', color: 'var(--text-dim)' }}>
-            ✓ Регистрация стартапа бесплатна<br />
-            ✓ Комиссия 8% взимается только при инвестиционной сделке<br />
-            ✓ Принимая соглашение, вы подтверждаете, что сделки будут проводиться только через WayInvest
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <input type="checkbox" id="agreeStartup" required />
-            <label htmlFor="agreeStartup" style={{ fontSize: '.85rem', color: 'var(--text-dim)' }}>
-              Я принимаю{' '}
-              <a style={{ color: 'var(--gold)', cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); openModal('terms') }}>Пользовательское соглашение</a>{' '}
-              и подтверждаю правила платформы
-            </label>
-          </div>
-          <button type="submit" className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} disabled={isPending}>
-            {isPending ? 'Регистрация...' : 'Зарегистрировать стартап →'}
-          </button>
-        </form>
+          {error && <div style={{ color: 'var(--red)', fontSize: '.85rem', marginBottom: 16 }}>{error}</div>}
+
+          {/* Startup form */}
+          {tab === 0 && (
+            <form id="regStartupForm" onSubmit={(e) => { e.preventDefault(); handleSendCode('startup') }}>
+              <div className="form-group"><label>Название стартапа</label><input name="startupName" placeholder="ТехЧечня" required /></div>
+              <div className="form-group"><label>ФИО основателя</label><input name="fullName" placeholder="Алихан Мусаев" required /></div>
+              <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="founder@startup.ru" required /></div>
+              <div className="form-group"><label>Пароль</label><input name="password" type="password" placeholder="••••••••" required minLength={6} /></div>
+              <div className="form-group">
+                <label>Отрасль</label>
+                <select name="sector">
+                  <option>IT / Технологии</option>
+                  <option>Агротех</option>
+                  <option>Финтех</option>
+                  <option>Логистика</option>
+                  <option>Ритейл</option>
+                </select>
+              </div>
+              <div style={{ background: 'rgba(201,168,76,.08)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.82rem', color: 'var(--text-dim)' }}>
+                ✓ Регистрация стартапа бесплатна<br />
+                ✓ Комиссия 8% взимается только при инвестиционной сделке<br />
+                ✓ Принимая соглашение, вы подтверждаете, что сделки будут проводиться только через WayInvest
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                <input type="checkbox" id="agreeStartup" required />
+                <label htmlFor="agreeStartup" style={{ fontSize: '.85rem', color: 'var(--text-dim)' }}>
+                  Я принимаю{' '}
+                  <a style={{ color: 'var(--gold)', cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); openModal('terms') }}>Пользовательское соглашение</a>{' '}
+                  и подтверждаю правила платформы
+                </label>
+              </div>
+              <button type="submit" className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} disabled={isPending}>
+                {isPending ? 'Отправка кода...' : 'Продолжить →'}
+              </button>
+            </form>
+          )}
+
+          {/* Investor form */}
+          {tab === 1 && (
+            <form id="regInvestorForm" onSubmit={(e) => { e.preventDefault(); handleSendCode('investor') }}>
+              <div className="form-group"><label>ФИО</label><input name="fullName" placeholder="Рустам Бекмурзаев" required /></div>
+              <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="investor@mail.ru" required /></div>
+              <div className="form-group"><label>Пароль</label><input name="password" type="password" placeholder="••••••••" required minLength={6} /></div>
+              <div style={{ background: 'rgba(231,76,60,.08)', border: '1px solid rgba(231,76,60,.2)', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.82rem', color: 'var(--text-dim)' }}>
+                ⚠️ До прохождения верификации администратором вы не можете просматривать стартапы, писать им или заключать сделки.<br /><br />
+                Комиссия платформы составляет <strong style={{ color: 'var(--gold)' }}>8%</strong> от суммы инвестиций. Данный размер фиксирован и не может быть оспорен.
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                <input type="checkbox" id="agreeInvestor" required />
+                <label htmlFor="agreeInvestor" style={{ fontSize: '.85rem', color: 'var(--text-dim)' }}>Я принимаю соглашение и подтверждаю комиссию 8%</label>
+              </div>
+              <button type="submit" className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} disabled={isPending}>
+                {isPending ? 'Отправка кода...' : 'Продолжить →'}
+              </button>
+            </form>
+          )}
+        </>
       )}
 
-      {/* Investor form */}
-      {tab === 1 && (
-        <form id="regInvestorForm" onSubmit={(e) => { e.preventDefault(); handleInvestorReg() }}>
-          <div className="form-group"><label>ФИО</label><input name="fullName" placeholder="Рустам Бекмурзаев" required /></div>
-          <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="investor@mail.ru" required /></div>
-          <div className="form-group"><label>Пароль</label><input name="password" type="password" placeholder="••••••••" required minLength={6} /></div>
-          <div className="form-group"><label>Статус (ИП / ООО)</label><input name="companyName" placeholder="ИП Бекмурзаев Р.А." required /></div>
-          <div className="form-group"><label>ОГРНИП / ОГРН</label><input name="ogrn" placeholder="321619600026782" required /></div>
-          <div className="form-group"><label>Документ (скан ИП)</label><input type="file" style={{ color: 'var(--text-dim)' }} /></div>
-          <div style={{ background: 'rgba(231,76,60,.08)', border: '1px solid rgba(231,76,60,.2)', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.82rem', color: 'var(--text-dim)' }}>
-            ⚠️ До прохождения верификации администратором вы не можете просматривать стартапы, писать им или заключать сделки.<br /><br />
-            Комиссия платформы составляет <strong style={{ color: 'var(--gold)' }}>8%</strong> от суммы инвестиций. Данный размер фиксирован и не может быть оспорен.
+      {/* Code verification step */}
+      {step === 'code' && (
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '3rem', marginBottom: 16 }}>📧</div>
+          <p style={{ color: 'var(--text-dim)', fontSize: '.9rem', marginBottom: 8 }}>Код отправлен на</p>
+          <p style={{ color: 'var(--gold)', fontSize: '1rem', fontWeight: 600, marginBottom: 24 }}>{savedEmail}</p>
+
+          {error && <div style={{ color: 'var(--red)', fontSize: '.85rem', marginBottom: 16 }}>{error}</div>}
+
+          <div className="form-group">
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="000000"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              style={{ textAlign: 'center', fontSize: '1.8rem', letterSpacing: '12px', fontWeight: 700, color: 'var(--gold)' }}
+            />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <input type="checkbox" id="agreeInvestor" required />
-            <label htmlFor="agreeInvestor" style={{ fontSize: '.85rem', color: 'var(--text-dim)' }}>Я принимаю соглашение и подтверждаю комиссию 8%</label>
-          </div>
-          <button type="submit" className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} disabled={isPending}>
-            {isPending ? 'Регистрация...' : 'Зарегистрироваться →'}
+
+          <button
+            className="btn btn-gold"
+            style={{ width: '100%', justifyContent: 'center', marginBottom: 12 }}
+            disabled={isPending || code.length !== 6}
+            onClick={() => handleVerifyAndRegister(tab === 0 ? 'startup' : 'investor')}
+          >
+            {isPending ? 'Проверка...' : 'Подтвердить и зарегистрироваться'}
           </button>
-        </form>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 12 }}>
+            <a style={{ color: 'var(--text-dim)', cursor: 'pointer', fontSize: '.85rem' }} onClick={() => { resetState() }}>← Назад</a>
+            <a style={{ color: 'var(--gold)', cursor: 'pointer', fontSize: '.85rem' }} onClick={handleResend}>Отправить код повторно</a>
+          </div>
+
+          <p style={{ color: 'var(--text-dim)', fontSize: '.75rem', marginTop: 16 }}>Код действителен 10 минут</p>
+        </div>
       )}
     </Overlay>
   )
