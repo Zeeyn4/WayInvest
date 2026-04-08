@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useApp } from '@/components/providers/app-provider'
 import {
   getAdminDashboardData,
-  getVerificationQueue,
   getAdminStartups,
   getAdminInvestors,
   getAdminEvents,
@@ -15,11 +14,10 @@ import {
   rejectInvestor,
 } from '@/actions/admin.actions'
 
-type Panel = 'dashboard' | 'verify' | 'startups' | 'investors' | 'events' | 'commissions' | 'tariffs'
+type Panel = 'dashboard' | 'startups' | 'investors' | 'events' | 'commissions' | 'tariffs'
 
 const panelTitles: Record<Panel, string> = {
   dashboard: 'Обзор платформы',
-  verify: 'Верификация инвесторов',
   startups: 'Управление стартапами',
   investors: 'Управление инвесторами',
   events: 'Мероприятия',
@@ -82,7 +80,6 @@ export default function AdminPage() {
 
   // Data states
   const [dashboardData, setDashboardData] = useState<any>(null)
-  const [verifyData, setVerifyData] = useState<any[] | null>(null)
   const [startupsData, setStartupsData] = useState<any[]>([])
   const [investorsData, setInvestorsData] = useState<any[]>([])
   const [eventsData, setEventsData] = useState<any[]>([])
@@ -99,9 +96,7 @@ export default function AdminPage() {
 
   // Load panel-specific data
   useEffect(() => {
-    if (activePanel === 'verify' && !verifyData) {
-      getVerificationQueue().then(setVerifyData).catch(() => {})
-    } else if (activePanel === 'startups' && startupsData.length === 0) {
+    if (activePanel === 'startups' && startupsData.length === 0) {
       getAdminStartups().then(setStartupsData).catch(() => {})
     } else if (activePanel === 'investors' && investorsData.length === 0) {
       getAdminInvestors().then(setInvestorsData).catch(() => {})
@@ -119,7 +114,6 @@ export default function AdminPage() {
       const result = await approveInvestor(id)
       showToast(`${result.name} верифицирован`, '✅')
       // Refresh data
-      getVerificationQueue().then(setVerifyData).catch(() => {})
       getAdminDashboardData().then(setDashboardData).catch(() => {})
       if (investorsData.length > 0) getAdminInvestors().then(setInvestorsData).catch(() => {})
     } catch {
@@ -131,7 +125,6 @@ export default function AdminPage() {
     try {
       const result = await rejectInvestor(id)
       showToast(`Заявка ${result.name} отклонена`, '❌')
-      getVerificationQueue().then(setVerifyData).catch(() => {})
       getAdminDashboardData().then(setDashboardData).catch(() => {})
       if (investorsData.length > 0) getAdminInvestors().then(setInvestorsData).catch(() => {})
     } catch {
@@ -158,12 +151,6 @@ export default function AdminPage() {
           onClick={() => { setActivePanel('dashboard'); setSidebarOpen(false) }}
         >
           <span className="icon">📊</span> Обзор
-        </div>
-        <div
-          className={`sidebar-item ${activePanel === 'verify' ? 'active' : ''}`}
-          onClick={() => { setActivePanel('verify'); setSidebarOpen(false) }}
-        >
-          <span className="icon">✅</span> Верификация
         </div>
         <div
           className={`sidebar-item ${activePanel === 'startups' ? 'active' : ''}`}
@@ -308,54 +295,6 @@ export default function AdminPage() {
             </>
           ) : (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>Не удалось загрузить данные</div>
-          )}
-        </div>
-
-        {/* Verify Panel */}
-        <div className={`dash-panel ${activePanel === 'verify' ? 'active' : ''}`}>
-          {!verifyData ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>Загрузка очереди верификации...</div>
-          ) : (
-            <>
-              <div className="verify-banner">
-                <div className="icon">⚠️</div>
-                <p><strong>{verifyData.length} заявок ожидают проверки</strong></p>
-              </div>
-
-              <div className="card">
-                {verifyData.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)' }}>Нет заявок на верификацию</div>
-                ) : (
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>ФИО</th>
-                        <th>Документ</th>
-                        <th>ОГРНИП</th>
-                        <th>Подано</th>
-                        <th>Действие</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {verifyData.map((item: any) => (
-                        <tr key={item.id}>
-                          <td className="fw-600">{item.name}</td>
-                          <td>{item.companyName || 'ИП'}</td>
-                          <td style={{ fontFamily: 'monospace', fontSize: '.82rem' }}>{item.ogrn || '—'}</td>
-                          <td>{timeAgo(item.createdAt)}</td>
-                          <td>
-                            <div className="flex-gap">
-                              <button className="btn btn-gold btn-sm" onClick={() => handleApprove(item.id, item.name)}>Одобрить</button>
-                              <button className="btn btn-danger btn-sm" onClick={() => handleReject(item.id, item.name)}>Отклонить</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </>
           )}
         </div>
 
@@ -532,20 +471,12 @@ export default function AdminPage() {
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th>Сделка</th>
-                        <th>Инвестор</th>
-                        <th>Сумма</th>
-                        <th>Комиссия {Math.round(commissionsData.settings.commissionRate * 100)}%</th>
                         <th>Дата</th>
                       </tr>
                     </thead>
                     <tbody>
                       {commissionsData.transactions.map((t: any) => (
                         <tr key={t.id}>
-                          <td className="fw-600">{t.startupName}</td>
-                          <td>{t.investorName}</td>
-                          <td>{fmtMoney(t.dealAmount)}</td>
-                          <td className="text-gold fw-600">{fmtMoney(t.commissionAmount)}</td>
                           <td>{fmtDate(t.completedAt)}</td>
                         </tr>
                       ))}
@@ -591,13 +522,13 @@ export default function AdminPage() {
                 <h3 style={{ marginBottom: 16 }}>Доход от тарифов</h3>
 
                 {(() => {
-                  const paidTariffs = tariffsData.filter((t: any) => t.priceMonthly > 0 && t.subscriberCount > 0)
-                  const maxRevenue = Math.max(...paidTariffs.map((t: any) => t.monthlyRevenue), 1)
-                  const totalMonthly = paidTariffs.reduce((s: number, t: any) => s + t.monthlyRevenue, 0)
+                  const allTariffs = tariffsData
+                  const maxRevenue = Math.max(...allTariffs.map((t: any) => t.monthlyRevenue), 1)
+                  const totalMonthly = allTariffs.reduce((s: number, t: any) => s + t.monthlyRevenue, 0)
 
                   return (
                     <>
-                      {paidTariffs.map((t: any, i: number) => (
+                      {allTariffs.map((t: any, i: number) => (
                         <div key={i} style={{ marginBottom: 20 }}>
                           <div className="flex-between">
                             <span className="fw-600">{t.name} <span className="text-dim" style={{ fontWeight: 400 }}>&times;{t.subscriberCount}</span></span>

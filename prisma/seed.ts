@@ -199,7 +199,7 @@ async function main() {
       companyName: 'ИП Бекмурзаев Р.А.',
       ogrn: '321619600026782',
       verificationStatus: VerificationStatus.APPROVED,
-      verifiedAt: new Date('2024-12-05'),
+      verifiedAt: new Date('2026-01-05'),
       sectorFocus: ['IT', 'Ритейл'],
       checkMin: BigInt(500000000),
       checkMax: BigInt(2000000000),
@@ -229,7 +229,7 @@ async function main() {
       companyName: 'ИП Ахматов М.С.',
       ogrn: '321619600026783',
       verificationStatus: VerificationStatus.APPROVED,
-      verifiedAt: new Date('2024-11-20'),
+      verifiedAt: new Date('2026-02-20'),
       sectorFocus: ['Финтех', 'IT'],
       checkMin: BigInt(200000000),
       checkMax: BigInt(800000000),
@@ -259,7 +259,7 @@ async function main() {
       companyName: 'ИП Алиева З.М.',
       ogrn: '321619600026784',
       verificationStatus: VerificationStatus.APPROVED,
-      verifiedAt: new Date('2024-11-15'),
+      verifiedAt: new Date('2026-03-15'),
       sectorFocus: ['Агротех', 'Экология'],
       checkMin: BigInt(1000000000),
       checkMax: BigInt(3000000000),
@@ -289,7 +289,7 @@ async function main() {
       companyName: 'ООО «ГрозИнвест»',
       ogrn: '7205105008',
       verificationStatus: VerificationStatus.APPROVED,
-      verifiedAt: new Date('2024-10-20'),
+      verifiedAt: new Date('2026-04-20'),
       sectorFocus: ['Логистика'],
       checkMin: BigInt(500000000),
       checkMax: BigInt(1500000000),
@@ -360,7 +360,7 @@ async function main() {
           commissionAmount: BigInt(120000000),
           totalAmount: BigInt(1620000000),
           status: DealStatus.COMPLETED,
-          createdAt: new Date('2024-11-01'),
+          createdAt: new Date('2026-01-11'),
         },
         {
           investorId: inv1.id,
@@ -370,7 +370,7 @@ async function main() {
           commissionAmount: BigInt(216000000),
           totalAmount: BigInt(2916000000),
           status: DealStatus.COMPLETED,
-          createdAt: new Date('2024-09-15'),
+          createdAt: new Date('2026-03-15'),
         },
         {
           investorId: inv2.id,
@@ -380,7 +380,7 @@ async function main() {
           commissionAmount: BigInt(64000000),
           totalAmount: BigInt(864000000),
           status: DealStatus.COMPLETED,
-          createdAt: new Date('2024-08-03'),
+          createdAt: new Date('2026-05-03'),
         },
       ],
     })
@@ -394,8 +394,8 @@ async function main() {
   if (existingNda === 0) {
     await prisma.ndaAgreement.createMany({
       data: [
-        { investorId: inv1.id, startupId: startup1.id, signedAt: new Date('2024-12-10') },
-        { investorId: inv2.id, startupId: startup1.id, signedAt: new Date('2024-12-08') },
+        { investorId: inv1.id, startupId: startup1.id, signedAt: new Date('2026-05-10') },
+        { investorId: inv2.id, startupId: startup1.id, signedAt: new Date('2026-05-08') },
       ],
     })
     console.log('NDA agreements seeded.')
@@ -416,9 +416,9 @@ async function main() {
     })
     await prisma.message.createMany({
       data: [
-        { chatId: chat1.id, senderId: inv1User.id, content: 'Добрый день! Ознакомился с вашим питч-деком. Очень интересная концепция для локального рынка.', createdAt: new Date('2024-12-15T14:18:00') },
-        { chatId: chat1.id, senderId: startup1User.id, content: 'Спасибо большое! Рады вашему интересу. Чем могу быть полезен?', createdAt: new Date('2024-12-15T14:20:00') },
-        { chatId: chat1.id, senderId: inv1User.id, content: 'Меня интересует раунд A. Каков ваш текущий ARR и планы на масштабирование?', createdAt: new Date('2024-12-15T14:22:00') },
+        { chatId: chat1.id, senderId: inv1User.id, content: 'Добрый день! Ознакомился с вашим питч-деком. Очень интересная концепция для локального рынка.', createdAt: new Date('2026-05-15T14:18:00') },
+        { chatId: chat1.id, senderId: startup1User.id, content: 'Спасибо большое! Рады вашему интересу. Чем могу быть полезен?', createdAt: new Date('2026-05-15T14:20:00') },
+        { chatId: chat1.id, senderId: inv1User.id, content: 'Меня интересует раунд A. Каков ваш текущий ARR и планы на масштабирование?', createdAt: new Date('2026-05-15T14:22:00') },
       ],
     })
 
@@ -432,8 +432,8 @@ async function main() {
     })
     await prisma.message.createMany({
       data: [
-        { chatId: chat2.id, senderId: inv2User.id, content: 'Пришлите финансовую модель, пожалуйста.', createdAt: new Date('2024-12-14T10:00:00') },
-        { chatId: chat2.id, senderId: startup1User.id, content: 'Добрый день! Финансовая модель доступна после подписания NDA.', createdAt: new Date('2024-12-14T10:15:00') },
+        { chatId: chat2.id, senderId: inv2User.id, content: 'Пришлите финансовую модель, пожалуйста.', createdAt: new Date('2026-05-14T10:00:00') },
+        { chatId: chat2.id, senderId: startup1User.id, content: 'Добрый день! Финансовая модель доступна после подписания NDA.', createdAt: new Date('2026-05-14T10:15:00') },
       ],
     })
 
@@ -447,7 +447,7 @@ async function main() {
     })
     await prisma.message.createMany({
       data: [
-        { chatId: chat3.id, senderId: inv3User.id, content: 'Когда следующий питч-день?', createdAt: new Date('2024-12-13T09:00:00') },
+        { chatId: chat3.id, senderId: inv3User.id, content: 'Когда следующий питч-день?', createdAt: new Date('2026-05-13T09:00:00') },
       ],
     })
 
@@ -470,8 +470,8 @@ async function main() {
     })
     await prisma.message.createMany({
       data: [
-        { chatId: chat5.id, senderId: startup2User.id, content: 'Добрый день, Рустам! Спасибо за интерес к нашему проекту.', createdAt: new Date('2024-12-15T14:20:00') },
-        { chatId: chat5.id, senderId: inv1User.id, content: 'Добрый! Изучил ваш питч-дек. Впечатляет тяга. Какой runway у вас сейчас?', createdAt: new Date('2024-12-15T14:23:00') },
+        { chatId: chat5.id, senderId: startup2User.id, content: 'Добрый день, Рустам! Спасибо за интерес к нашему проекту.', createdAt: new Date('2026-05-15T14:20:00') },
+        { chatId: chat5.id, senderId: inv1User.id, content: 'Добрый! Изучил ваш питч-дек. Впечатляет тяга. Какой runway у вас сейчас?', createdAt: new Date('2026-05-15T14:23:00') },
       ],
     })
 
@@ -485,8 +485,8 @@ async function main() {
   if (existingDocs === 0) {
     await prisma.document.createMany({
       data: [
-        { startupId: startup1.id, fileName: 'PitchDeck_ТехЧечня_2024.pdf', fileUrl: '/uploads/pitchdeck.pdf', fileSizeMb: 4.2, accessLevel: 'public' },
-        { startupId: startup1.id, fileName: 'Финансовая_модель_2025.xlsx', fileUrl: '/uploads/finmodel.xlsx', fileSizeMb: 1.8, accessLevel: 'premium' },
+        { startupId: startup1.id, fileName: 'PitchDeck_ТехЧечня_2026.pdf', fileUrl: '/uploads/pitchdeck.pdf', fileSizeMb: 4.2, accessLevel: 'public' },
+        { startupId: startup1.id, fileName: 'Финансовая_модель_2026.xlsx', fileUrl: '/uploads/finmodel.xlsx', fileSizeMb: 1.8, accessLevel: 'premium' },
         { startupId: startup1.id, fileName: 'Устав_компании.pdf', fileUrl: '/uploads/charter.pdf', fileSizeMb: 2.1, accessLevel: 'nda' },
       ],
     })
@@ -500,10 +500,10 @@ async function main() {
   if (existingEvents === 0) {
     await prisma.event.createMany({
       data: [
-        { title: 'Питч-день WayInvest #4', type: 'Питч-сессия', emoji: '🎤', description: 'Лучшие стартапы ЧР представят свои проекты перед инвесторами платформы.', dateTime: new Date('2024-12-20T14:00:00'), participants: 45 },
-        { title: 'Вебинар: Как привлечь первые инвестиции', type: 'Вебинар', emoji: '💡', description: 'Практическое руководство по подготовке к инвестиционному раунду.', dateTime: new Date('2024-12-22T12:00:00'), participants: 120 },
-        { title: 'Мастер-класс: Финансовая модель стартапа', type: 'Мастер-класс', emoji: '📊', description: 'Как построить правильную финансовую модель для привлечения инвестора.', dateTime: new Date('2024-12-25T15:00:00'), participants: 67 },
-        { title: 'Нетворкинг для инвесторов ЧР', type: 'Сетевое мероприятие', emoji: '🤝', description: 'Закрытое мероприятие для верифицированных инвесторов платформы.', dateTime: new Date('2024-12-28T18:00:00'), participants: 22 },
+        { title: 'Питч-день LamInvest #4', type: 'Питч-сессия', emoji: '🎤', description: 'Лучшие стартапы ЧР представят свои проекты перед инвесторами платформы.', dateTime: new Date('2026-01-20T14:00:00'), participants: 45 },
+        { title: 'Вебинар: Как привлечь первые инвестиции', type: 'Вебинар', emoji: '💡', description: 'Практическое руководство по подготовке к инвестиционному раунду.', dateTime: new Date('2026-02-22T12:00:00'), participants: 120 },
+        { title: 'Мастер-класс: Финансовая модель стартапа', type: 'Мастер-класс', emoji: '📊', description: 'Как построить правильную финансовую модель для привлечения инвестора.', dateTime: new Date('2026-03-25T15:00:00'), participants: 67 },
+        { title: 'Нетворкинг для инвесторов ЧР', type: 'Сетевое мероприятие', emoji: '🤝', description: 'Закрытое мероприятие для верифицированных инвесторов платформы.', dateTime: new Date('2026-05-28T18:00:00'), participants: 22 },
       ],
     })
     console.log('Events seeded.')

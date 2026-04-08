@@ -66,7 +66,7 @@ function LoginModal() {
         return
       }
       closeModal()
-      showToast('Добро пожаловать в WayInvest!', '👋')
+      showToast('Добро пожаловать в LamInvest!', '👋')
       router.push(result.redirect || '/')
       router.refresh()
     })
@@ -74,7 +74,7 @@ function LoginModal() {
 
   return (
     <Overlay id="login">
-      <h2>Войти в WayInvest</h2>
+      <h2>Войти в LamInvest</h2>
       <div className="tabs">
         {roles.map((r, i) => (
           <button key={r} className={`tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>{r}</button>
@@ -219,7 +219,7 @@ function RegisterModal() {
               <div style={{ background: 'rgba(201,168,76,.08)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.82rem', color: 'var(--text-dim)' }}>
                 ✓ Регистрация стартапа бесплатна<br />
                 ✓ Комиссия 8% взимается только при инвестиционной сделке<br />
-                ✓ Принимая соглашение, вы подтверждаете, что сделки будут проводиться только через WayInvest
+                ✓ Принимая соглашение, вы подтверждаете, что сделки будут проводиться только через LamInvest
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <input type="checkbox" id="agreeStartup" required />
@@ -309,10 +309,10 @@ function TermsModal() {
       <h2>Пользовательское соглашение</h2>
       <div style={{ color: 'var(--text-dim)', fontSize: '.85rem', lineHeight: 1.8, maxHeight: '60vh', overflowY: 'auto' }}>
         <p><strong style={{ color: 'var(--gold)' }}>1. Комиссия платформы</strong><br />
-        Оператор платформы WayInvest взимает комиссию в размере <strong style={{ color: 'var(--gold)' }}>8% (восемь процентов)</strong> от суммы каждой инвестиционной сделки, совершённой через платформу. Данный размер комиссии является фиксированным, закреплён в настоящем Соглашении и <strong style={{ color: 'var(--text)' }}>не может быть изменён, оспорен или пересмотрен</strong> ни инвестором, ни стартапом в одностороннем порядке.</p>
+        Оператор платформы LamInvest взимает комиссию в размере <strong style={{ color: 'var(--gold)' }}>8% (восемь процентов)</strong> от суммы каждой инвестиционной сделки, совершённой через платформу. Данный размер комиссии является фиксированным, закреплён в настоящем Соглашении и <strong style={{ color: 'var(--text)' }}>не может быть изменён, оспорен или пересмотрен</strong> ни инвестором, ни стартапом в одностороннем порядке.</p>
         <br />
         <p><strong style={{ color: 'var(--gold)' }}>2. Обязательность проведения сделок через платформу</strong><br />
-        Все инвестиционные сделки между инвесторами и стартапами, познакомившимися через WayInvest, должны быть проведены исключительно через функционал платформы. Сделка считается совершённой и защищённой только при использовании платёжного и документального функционала WayInvest.</p>
+        Все инвестиционные сделки между инвесторами и стартапами, познакомившимися через LamInvest, должны быть проведены исключительно через функционал платформы. Сделка считается совершённой и защищённой только при использовании платёжного и документального функционала LamInvest.</p>
         <br />
         <p><strong style={{ color: 'var(--gold)' }}>3. Запрет обходных сделок</strong><br />
         Заключение сделок, договорённостей или переводов вне платформы с целью избежать уплаты комиссии является грубым нарушением настоящего Соглашения. Нарушение влечёт <strong style={{ color: 'var(--red)' }}>немедленную блокировку профиля</strong> и может стать основанием для юридических претензий.</p>
@@ -324,7 +324,7 @@ function TermsModal() {
         Просматривая детальные материалы стартапа (финансовые показатели, техническая документация, бизнес-план), инвестор подтверждает принятие условий NDA (соглашения о неразглашении). Передача, копирование или разглашение данных материалов третьим лицам запрещена.</p>
         <br />
         <p><strong style={{ color: 'var(--gold)' }}>6. Ответственность</strong><br />
-        Стартап несёт ответственность за достоверность предоставленной информации. Инвестор несёт ответственность за подлинность документов при верификации. WayInvest не является стороной инвестиционной сделки, а выступает платформой-посредником.</p>
+        Стартап несёт ответственность за достоверность предоставленной информации. Инвестор несёт ответственность за подлинность документов при верификации. LamInvest не является стороной инвестиционной сделки, а выступает платформой-посредником.</p>
       </div>
       <button className="btn btn-gold" style={{ marginTop: 20 }} onClick={() => { closeModal(); showToast('Соглашение принято', '✅') }}>Принять и закрыть</button>
     </Overlay>
@@ -345,7 +345,7 @@ function NDAModal() {
       <div style={{ background: '#222836', borderRadius: 10, padding: 16, marginBottom: 24, textAlign: 'left', fontSize: '.82rem', color: '#8A8680' }}>
         <div style={{ marginBottom: 6 }}>📋 Документы: <strong style={{ color: '#E8E4DC' }}>PitchDeck + Финансовая модель</strong></div>
         <div style={{ marginBottom: 6 }}>🏢 Стартап: <strong style={{ color: '#E8E4DC' }}>ТехЧечня</strong></div>
-        <div>📅 Дата: <strong style={{ color: '#E8E4DC' }}>15.12.2024</strong></div>
+        <div>📅 Дата: <strong style={{ color: '#E8E4DC' }}>15.05.2026</strong></div>
       </div>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
         <button className="btn btn-ghost" onClick={() => closeModal()}>Отмена</button>
@@ -406,7 +406,7 @@ function DocsViewerModal() {
                 <div style={{ fontSize: '2.8rem', marginBottom: 12 }}>🚀</div>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '2rem', color: '#C9A84C', fontWeight: 700, marginBottom: 8 }}>ТехЧечня</div>
                 <div style={{ color: '#8A8680', fontSize: '1rem' }}>Маркетплейс локальных услуг</div>
-                <div style={{ marginTop: 16, color: '#E8E4DC', fontSize: '.9rem' }}>Pre-seed раунд • 2024</div>
+                <div style={{ marginTop: 16, color: '#E8E4DC', fontSize: '.9rem' }}>Pre-seed раунд • 2026</div>
               </div>
               {/* Slide 2 */}
               <div style={{ background: '#111318', border: '1px solid rgba(201,168,76,.2)', borderRadius: 12, padding: 28, marginBottom: 16 }}>
@@ -472,25 +472,25 @@ function DocsViewerModal() {
                   </thead>
                   <tbody>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q1 2024</td>
+                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q1 2026</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>₽680 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#2ECC71' }}>+18%</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>340</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q2 2024</td>
+                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q2 2026</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>₽890 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#2ECC71' }}>+31%</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>620</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q3 2024</td>
+                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q3 2026</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>₽1 150 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#2ECC71' }}>+29%</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>890</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q4 2024</td>
+                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Q4 2026</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#C9A84C', fontWeight: 700 }}>₽1 480 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#2ECC71' }}>+29%</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#C9A84C', fontWeight: 700 }}>1 200</td>
@@ -509,7 +509,7 @@ function DocsViewerModal() {
               </div>
               {/* Forecast */}
               <div style={{ background: '#111318', border: '1px solid rgba(201,168,76,.2)', borderRadius: 12, padding: 24 }}>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.2rem', color: '#C9A84C', marginBottom: 18 }}>📅 Прогноз 2025 (с инвестицией ₽10М)</div>
+                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.2rem', color: '#C9A84C', marginBottom: 18 }}>📅 Прогноз 2026 (с инвестицией ₽10М)</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.85rem' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(201,168,76,.25)' }}>
@@ -521,19 +521,19 @@ function DocsViewerModal() {
                   </thead>
                   <tbody>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Янв 2025</td>
+                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Янв 2026</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>₽1 700 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E74C3C' }}>₽1 400 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#2ECC71' }}>₽300 000</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Мар 2025</td>
+                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Мар 2026</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E8E4DC' }}>₽2 100 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E74C3C' }}>₽1 550 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#2ECC71' }}>₽550 000</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Июн 2025</td>
+                      <td style={{ padding: '10px 12px', color: '#E8E4DC' }}>Май 2026</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#C9A84C', fontWeight: 700 }}>₽3 200 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#E74C3C' }}>₽1 800 000</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', color: '#2ECC71', fontWeight: 700 }}>₽1 400 000</td>
@@ -547,7 +547,7 @@ function DocsViewerModal() {
 
         {/* Footer */}
         <div style={{ background: '#1A1E26', borderTop: '1px solid rgba(201,168,76,.15)', padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '.75rem', color: '#8A8680' }}>🔒 Просмотр защищён NDA • Действия логируются • Рустам Бекмурзаев • 15.12.2024</span>
+          <span style={{ fontSize: '.75rem', color: '#8A8680' }}>🔒 Просмотр защищён NDA • Действия логируются • Рустам Бекмурзаев • 15.05.2026</span>
           <button className="btn btn-gold btn-sm" onClick={() => { closeModal(); openModal('newDeal') }}>Инвестировать в стартап →</button>
         </div>
       </div>
@@ -605,7 +605,7 @@ function NewDealModal() {
     <Overlay id="newDeal">
       <h2>Новая инвестиционная сделка</h2>
       <div style={{ background: 'rgba(201,168,76,.08)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 20, fontSize: '.83rem', color: 'var(--text-dim)' }}>
-        Сделка будет проведена через платформу WayInvest. Комиссия <strong style={{ color: 'var(--gold)' }}>8%</strong> будет удержана автоматически.
+        Сделка будет проведена через платформу LamInvest. Комиссия <strong style={{ color: 'var(--gold)' }}>8%</strong> будет удержана автоматически.
       </div>
       <div className="form-group">
         <label>Стартап</label>
@@ -617,7 +617,7 @@ function NewDealModal() {
       </div>
       <div style={{ background: 'var(--dark3)', borderRadius: 8, padding: 14, marginBottom: 20 }}>
         <div className="flex-between" style={{ fontSize: '.88rem', marginBottom: 6 }}><span>Сумма инвестиции:</span><span>{fmt(num)}</span></div>
-        <div className="flex-between" style={{ fontSize: '.88rem', marginBottom: 6 }}><span>Комиссия WayInvest (8%):</span><span style={{ color: 'var(--gold)' }}>{fmt(commission)}</span></div>
+        <div className="flex-between" style={{ fontSize: '.88rem', marginBottom: 6 }}><span>Комиссия LamInvest (8%):</span><span style={{ color: 'var(--gold)' }}>{fmt(commission)}</span></div>
         <div className="flex-between" style={{ fontSize: '.95rem', fontWeight: 600, borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8 }}><span>Итого к оплате:</span><span>{fmt(total)}</span></div>
       </div>
       <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { closeModal(); showToast('Сделка инициирована! Стартап получил уведомление.', '🤝') }}>Инициировать сделку →</button>
@@ -633,7 +633,7 @@ function AddEventModal() {
   return (
     <Overlay id="addEvent">
       <h2>Создать мероприятие</h2>
-      <div className="form-group"><label>Название</label><input placeholder="Питч-день WayInvest #5" /></div>
+      <div className="form-group"><label>Название</label><input placeholder="Питч-день LamInvest #5" /></div>
       <div className="form-group">
         <label>Тип</label>
         <select><option>Питч-сессия</option><option>Вебинар</option><option>Мастер-класс</option></select>

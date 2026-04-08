@@ -19,7 +19,7 @@ export default function Home() {
       <div style={{position:'relative'}}>
       <nav className="nav">
         <div className="nav-logo" onClick={() => window.scrollTo(0, 0)} style={{ cursor: 'pointer' }}>
-          Way<span>Invest</span>
+          Lam<span>Invest</span>
         </div>
         <div className="nav-links">
           <a className="nav-link" onClick={() => scrollTo('about')}>О платформе</a>
@@ -52,12 +52,12 @@ export default function Home() {
         <div className="floating-card fc1">🚀 <strong style={{ color: 'var(--gold)' }}>42</strong> активных стартапа</div>
         <div className="floating-card fc2">💼 <strong style={{ color: 'var(--gold)' }}>18</strong> верифицированных инвесторов</div>
         <div className="floating-card fc3">🤝 <strong style={{ color: 'var(--gold)' }}>₽ 280М+</strong> привлечено</div>
-        <div className="hero-badge">🇷🇺 Инвестиционная платформа Чечни</div>
-        <h1>Первая инвест-платформа<br />для <span>чеченского</span> рынка</h1>
-        <p>WayInvest соединяет перспективные стартапы с верифицированными инвесторами. Безопасные сделки, AI-подбор партнёров, защита от мошенничества.</p>
+        <div className="hero-badge">🇷🇺 Первая инвест-платформа регионального рынка</div>
+        <h1>Первая инвест-платформа<br />регионального рынка</h1>
+        <p>LamInvest соединяет перспективные стартапы с верифицированными инвесторами. Безопасные сделки, AI-подбор партнёров, защита от мошенничества.</p>
         <div className="hero-btns">
           <button className="btn btn-gold" onClick={() => openModal('register')} style={{ fontSize: '1rem', padding: '14px 36px' }}>Разместить стартап</button>
-          <button className="btn btn-outline" onClick={() => openModal('register')} style={{ fontSize: '1rem', padding: '14px 36px' }}>Я инвестор →</button>
+          <button className="btn btn-outline" onClick={() => openModal('register')} style={{ fontSize: '1rem', padding: '14px 36px' }}>Я инвестор</button>
         </div>
         <div style={{ marginTop: 60, display: 'flex', gap: 48, flexWrap: 'wrap', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
@@ -82,7 +82,7 @@ export default function Home() {
       {/* ABOUT */}
       <div id="about" style={{ background: 'var(--dark2)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="section">
-          <div className="section-title">Как работает WayInvest</div>
+          <div className="section-title">Как работает LamInvest</div>
           <div className="divider"></div>
           <div className="grid-3">
             <div className="feature-card">
@@ -124,7 +124,7 @@ export default function Home() {
         <div className="section">
           <div className="section-title">Тарифы для стартапов</div>
           <div className="section-sub">Размещение на платформе бесплатно. Дополнительные пакеты помогают стартапам привлечь внимание инвесторов быстрее.</div>
-          <div className="commission-notice">⚠️ <strong>Важно:</strong> При совершении инвестиционной сделки через WayInvest с суммы инвестиций удерживается комиссия платформы <strong>8%</strong>. Данный размер комиссии является фиксированным, закреплён в Пользовательском соглашении и не может быть изменён или оспорен ни инвестором, ни стартапом.</div>
+          <div className="commission-notice">⚠️ <strong>Важно:</strong> При совершении инвестиционной сделки через LamInvest с суммы инвестиций удерживается комиссия платформы <strong>8%</strong>. Данный размер комиссии является фиксированным, закреплён в Пользовательском соглашении и не может быть изменён или оспорен ни инвестором, ни стартапом.</div>
           <div className="grid-4" style={{ alignItems: 'start' }}>
             {/* Базовый */}
             <div className="pkg-card" onClick={() => openModal('package')}>
@@ -243,7 +243,7 @@ export default function Home() {
                   { n: '1', title: 'Зарегистрируйтесь бесплатно', desc: 'Создайте профиль команды и проекта. Загрузите питч-дек и финансовые показатели.' },
                   { n: '2', title: 'Получайте отклики от инвесторов', desc: 'AI-алгоритм подбирает релевантных инвесторов под ваш профиль и запросы.' },
                   { n: '3', title: 'Ведите переговоры в чате', desc: 'Все коммуникации — внутри платформы. История переписки защищена и документируется.' },
-                  { n: '4', title: 'Закройте сделку через WayInvest', desc: 'Инвестиция проходит через платформу. Сделка официально зафиксирована и защищена.' },
+                  { n: '4', title: 'Закройте сделку через LamInvest', desc: 'Инвестиция проходит через платформу. Сделка официально зафиксирована и защищена.' },
                 ].map((s) => (
                   <div key={s.n} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                     <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(201,168,76,.15)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.8rem', color: 'var(--gold)', flexShrink: 0, fontWeight: 700 }}>{s.n}</div>
@@ -263,7 +263,7 @@ export default function Home() {
                   { n: '1', title: 'Пройдите верификацию', desc: 'Загрузите документы ИП или юрлица. Администратор проверит данные в течение 1–2 рабочих дней.' },
                   { n: '2', title: 'Заполните инвестиционный профиль', desc: 'Укажите отраслевые интересы, инвестиционный чек, стадии и регион поиска.' },
                   { n: '3', title: 'Изучайте стартапы через AI', desc: 'Получайте персональные рекомендации. Просматривайте материалы под защитой NDA.' },
-                  { n: '4', title: 'Инвестируйте через платформу', desc: 'Комиссия 8% удерживается платформой автоматически при проведении сделки через WayInvest.' },
+                  { n: '4', title: 'Инвестируйте через платформу', desc: 'Комиссия 8% удерживается платформой автоматически при проведении сделки через LamInvest.' },
                 ].map((s) => (
                   <div key={s.n} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                     <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(201,168,76,.15)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.8rem', color: 'var(--gold)', flexShrink: 0, fontWeight: 700 }}>{s.n}</div>
@@ -283,8 +283,8 @@ export default function Home() {
       <footer>
         <div className="footer-grid">
           <div>
-            <div className="footer-logo">Way<span>Invest</span></div>
-            <p className="footer-desc">Первая инвестиционная платформа Чечни. Безопасные сделки между стартапами и верифицированными инвесторами.</p>
+            <div className="footer-logo">Lam<span>Invest</span></div>
+            <p className="footer-desc">Первая инвест-платформа регионального рынка. Безопасные сделки между стартапами и верифицированными инвесторами.</p>
             <div style={{ marginTop: 16, color: 'var(--text-dim)', fontSize: '.8rem' }}>📍 Грозный, Чеченская Республика</div>
           </div>
           <div className="footer-col">
@@ -309,7 +309,7 @@ export default function Home() {
             <a>FAQ</a>
           </div>
         </div>
-        <div className="footer-bottom">© 2024 WayInvest. Все права защищены. Комиссия платформы 8% фиксирована и не подлежит изменению.</div>
+        <div className="footer-bottom">© 2026 LamInvest. Все права защищены. Комиссия платформы 8% фиксирована и не подлежит изменению.</div>
       </footer>
     </div>
   )

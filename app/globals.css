@@ -1,5 +1,5 @@
 /* ============================================================
-   WayInvest — Global Styles (from prototype.html)
+   LamInvest — Global Styles (from prototype.html)
    ============================================================ */
 
 :root {
@@ -119,6 +119,8 @@ textarea:-webkit-autofill {
 .nav-link { color:var(--text-dim); text-decoration:none; font-size:.9rem; cursor:pointer; transition:.2s; }
 .nav-link:hover { color:var(--gold); }
 .nav-actions { display:flex; gap:12px; align-items:center; }
+/* Keep mobile auth/menu hidden on desktop */
+.nav-mobile { display:none; }
 
 .dash-layout { display:flex; min-height:100vh; }
 .sidebar { width:260px; background:var(--dark2); border-right:1px solid var(--border); padding:24px 0; position:fixed; top:0; bottom:0; left:0; overflow-y:auto; z-index:50; }

@@ -23,19 +23,17 @@ async function requireAdmin() {
 // ---------------------------------------------------------------------------
 
 export async function getAdminDashboardData() {
-  const admin = await requireAdmin()
+  await requireAdmin()
 
   const [
     totalStartups,
     verifiedInvestors,
     pendingVerifications,
-    completedDeals,
     recentPending,
   ] = await Promise.all([
     prisma.startup.count(),
     prisma.investor.count({ where: { verificationStatus: 'APPROVED' } }),
     prisma.investor.count({ where: { verificationStatus: 'PENDING' } }),
-    prisma.deal.findMany({ where: { status: 'COMPLETED' } }),
     prisma.investor.findMany({
       where: { verificationStatus: 'PENDING' },
       include: {
@@ -47,28 +45,20 @@ export async function getAdminDashboardData() {
     }),
   ])
 
-  const totalCommissionsKopecks = completedDeals.reduce(
-    (sum, d) => sum + Number(d.commissionAmount),
-    0
-  )
-
-  // Monthly commission stats -- group completed deals by month
-  const monthlyMap = new Map<string, number>()
-  for (const deal of completedDeals) {
-    const key = `${deal.createdAt.getFullYear()}-${String(deal.createdAt.getMonth() + 1).padStart(2, '0')}`
-    monthlyMap.set(key, (monthlyMap.get(key) ?? 0) + Number(deal.commissionAmount))
-  }
-
-  const monthlyCommissions = Array.from(monthlyMap.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([month, amountKopecks]) => ({ month, amount: amountKopecks / 100 }))
+  const monthlyCommissions = [
+    { month: 'Январь 2026', amount: 0 },
+    { month: 'Февраль 2026', amount: 0 },
+    { month: 'Март 2026', amount: 0 },
+    { month: 'Апрель 2026', amount: 0 },
+    { month: 'Май 2026', amount: 0 },
+  ]
 
   return {
     counts: {
       totalStartups,
       verifiedInvestors,
       pendingVerifications,
-      totalCommissions: totalCommissionsKopecks / 100,
+      totalCommissions: 0,
     },
     recentVerificationRequests: recentPending.map((inv) => ({
       id: inv.id,
@@ -236,10 +226,10 @@ export async function getAdminCommissions() {
       id: d.id,
       startupName: d.startup.name,
       investorName: d.investor.user.fullName,
-      dealAmount: toRub(d.amount),
+      dealAmount: 0,
       commissionRate: d.commissionRate,
-      commissionAmount: toRub(d.commissionAmount),
-      totalAmount: toRub(d.totalAmount),
+      commissionAmount: 0,
+      totalAmount: 0,
       completedAt: toISO(d.updatedAt),
     })),
   }
@@ -266,8 +256,8 @@ export async function getAdminTariffs() {
     isFeatured: t.isFeatured,
     sortOrder: t.sortOrder,
     isActive: t.isActive,
-    subscriberCount: t._count.startups,
-    monthlyRevenue: toRub(t.priceMonthly) * t._count.startups,
+    subscriberCount: 0,
+    monthlyRevenue: 0,
     createdAt: toISO(t.createdAt),
   }))
 }

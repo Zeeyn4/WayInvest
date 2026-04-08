@@ -6,19 +6,17 @@ import { useApp } from '@/components/providers/app-provider'
 import {
   getInvestorDashboardData,
   getInvestorProfile,
-  getInvestorVerification,
   getStartupCatalog,
   getInvestorDeals,
   getInvestorEvents,
 } from '@/actions/investor.actions'
 import { getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
-type Panel = 'dashboard' | 'profile' | 'verify' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'deals'
+type Panel = 'dashboard' | 'profile' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'deals'
 
 const panelTitles: Record<Panel, string> = {
   dashboard: 'Дашборд',
   profile: 'Мой профиль',
-  verify: 'Верификация',
   aiMatch: 'AI-подбор стартапов',
   catalog: 'Каталог стартапов',
   chat: 'Чаты',
@@ -99,7 +97,6 @@ export default function InvestorPage() {
   // Data states
   const [dashboardData, setDashboardData] = useState<any>(null)
   const [profileData, setProfileData] = useState<any>(null)
-  const [verificationData, setVerificationData] = useState<any>(null)
   const [catalogData, setCatalogData] = useState<any[]>([])
   const [dealsData, setDealsData] = useState<any[] | null>(null)
   const [eventsData, setEventsData] = useState<any[]>([])
@@ -146,8 +143,6 @@ export default function InvestorPage() {
   useEffect(() => {
     if (activePanel === 'profile' && !profileData) {
       getInvestorProfile().then(setProfileData).catch(() => {})
-    } else if (activePanel === 'verify' && !verificationData) {
-      getInvestorVerification().then(setVerificationData).catch(() => {})
     } else if ((activePanel === 'catalog' || activePanel === 'aiMatch') && catalogData.length === 0) {
       getStartupCatalog().then(setCatalogData).catch(() => {})
     } else if (activePanel === 'deals' && !dealsData) {
@@ -235,13 +230,6 @@ export default function InvestorPage() {
         >
           <span className="icon">👤</span> Мой профиль
         </div>
-        <div
-          className={`sidebar-item ${activePanel === 'verify' ? 'active' : ''}`}
-          onClick={() => { setActivePanel('verify'); setSidebarOpen(false) }}
-        >
-          <span className="icon">🛡️</span> Верификация
-        </div>
-
         <div className="sidebar-section">Стартапы</div>
         <div
           className={`sidebar-item ${activePanel === 'aiMatch' ? 'active' : ''}`}
@@ -489,71 +477,6 @@ export default function InvestorPage() {
           )}
         </div>
 
-        {/* Verify Panel */}
-        <div className={`dash-panel ${activePanel === 'verify' ? 'active' : ''}`}>
-          {!verificationData ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>Загрузка данных верификации...</div>
-          ) : (
-            <>
-              {verificationData.verificationStatus === 'APPROVED' ? (
-                <div style={{ background: 'rgba(46,204,113,.1)', border: '1px solid rgba(46,204,113,.3)', borderRadius: 12, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <span style={{ fontSize: '1.5rem' }}>✅</span>
-                  <div>
-                    <div className="fw-600 text-green" style={{ marginBottom: 4 }}>Верификация пройдена</div>
-                    <div className="text-dim" style={{ fontSize: '.85rem' }}>
-                      {verificationData.companyName} · ОГРНИП: <span style={{ fontFamily: 'monospace' }}>{verificationData.ogrn}</span> {verificationData.verifiedAt && `· Дата верификации: ${fmtDate(verificationData.verifiedAt)}`}
-                    </div>
-                  </div>
-                </div>
-              ) : verificationData.verificationStatus === 'PENDING' ? (
-                <div style={{ background: 'rgba(241,196,15,.1)', border: '1px solid rgba(241,196,15,.3)', borderRadius: 12, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <span style={{ fontSize: '1.5rem' }}>⏳</span>
-                  <div>
-                    <div className="fw-600 text-gold" style={{ marginBottom: 4 }}>Заявка на проверке</div>
-                    <div className="text-dim" style={{ fontSize: '.85rem' }}>
-                      {verificationData.companyName} · ОГРНИП: <span style={{ fontFamily: 'monospace' }}>{verificationData.ogrn}</span> · Ожидайте решения администратора.
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ background: 'rgba(231,76,60,.1)', border: '1px solid rgba(231,76,60,.3)', borderRadius: 12, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <span style={{ fontSize: '1.5rem' }}>❌</span>
-                  <div>
-                    <div className="fw-600 text-red" style={{ marginBottom: 4 }}>Верификация отклонена</div>
-                    <div className="text-dim" style={{ fontSize: '.85rem' }}>
-                      Пожалуйста, обратитесь в поддержку для уточнения причин отказа.
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="card">
-                <h3 style={{ marginBottom: 20 }}>Процесс верификации</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  {(() => {
-                    const docsUploaded = verificationData.documents.length > 0
-                    const approved = verificationData.verificationStatus === 'APPROVED'
-                    const steps = [
-                      { done: docsUploaded, label: 'Шаг 1: Загрузка документов', desc: 'Загрузите скан ИП/ООО, ОГРНИП/ОГРН и паспорт учредителя.' },
-                      { done: approved, label: 'Шаг 2: Проверка администратором', desc: 'Администратор проверяет документы в течение 1–2 рабочих дней.' },
-                      { done: approved, label: 'Шаг 3: Получение статуса', desc: 'Вы получаете статус верифицированного инвестора и доступ ко всем функциям.' },
-                    ]
-                    return steps.map((step, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: step.done ? 'rgba(46,204,113,.15)' : 'var(--dark3)', border: `1px solid ${step.done ? 'rgba(46,204,113,.3)' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: step.done ? 'var(--green)' : 'var(--text-dim)', fontWeight: 700 }}>{step.done ? '✓' : i + 1}</div>
-                        <div>
-                          <div className="fw-600" style={{ marginBottom: 4 }}>{step.label}</div>
-                          <div className="text-dim" style={{ fontSize: '.85rem' }}>{step.desc}</div>
-                        </div>
-                      </div>
-                    ))
-                  })()}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
         {/* AI Match Panel */}
         <div className={`dash-panel ${activePanel === 'aiMatch' ? 'active' : ''}`}>
           <div style={{ background: 'linear-gradient(135deg, rgba(52,152,219,.12), rgba(52,152,219,.04))', border: '1px solid rgba(52,152,219,.3)', borderRadius: 12, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -754,7 +677,7 @@ export default function InvestorPage() {
           ) : (
             <>
               <div className="commission-notice">
-                Комиссия платформы: <strong>{dealsData.length > 0 ? Math.round(dealsData[0].commissionRate * 100) : 8}%</strong> от суммы каждой сделки. Все сделки проводятся через безопасный эскроу-счёт WayInvest.
+                Комиссия платформы: <strong>{dealsData.length > 0 ? Math.round(dealsData[0].commissionRate * 100) : 8}%</strong> от суммы каждой сделки. Все сделки проводятся через безопасный эскроу-счёт LamInvest.
               </div>
 
               <div className="card">
