@@ -49,9 +49,6 @@ export default function Home() {
       <section className="hero">
         <div className="hero-bg"></div>
         <div className="hero-lines"></div>
-        <div className="floating-card fc1">🚀 <strong style={{ color: 'var(--gold)' }}>42</strong> активных стартапа</div>
-        <div className="floating-card fc2">💼 <strong style={{ color: 'var(--gold)' }}>18</strong> верифицированных инвесторов</div>
-        <div className="floating-card fc3">🤝 <strong style={{ color: 'var(--gold)' }}>₽ 280М+</strong> привлечено</div>
         <div className="hero-badge">🇷🇺 Первая инвест-платформа регионального рынка</div>
         <h1>Первая инвест-платформа<br />регионального рынка</h1>
         <p>LamInvest соединяет перспективные стартапы с верифицированными инвесторами. Безопасные сделки, AI-подбор партнёров, защита от мошенничества.</p>
