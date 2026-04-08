@@ -366,9 +366,7 @@ export default function AdminPage() {
                 <thead>
                   <tr>
                     <th>Инвестор</th>
-                    <th>Документ</th>
                     <th>Сделки</th>
-                    <th>Статус</th>
                     <th>Действие</th>
                   </tr>
                 </thead>
@@ -376,13 +374,7 @@ export default function AdminPage() {
                   {investorsData.map((inv: any) => (
                     <tr key={inv.id}>
                       <td className="fw-600">{inv.name}</td>
-                      <td>{inv.companyName || 'ИП'}</td>
-                      <td>{inv.dealCount} ({fmtMoney(inv.totalInvested)})</td>
-                      <td>
-                        <span className={`badge ${inv.verificationStatus === 'APPROVED' ? 'badge-green' : inv.verificationStatus === 'PENDING' ? 'badge-gold' : 'badge-red'}`}>
-                          {inv.verificationStatus === 'APPROVED' ? 'Верифицирован' : inv.verificationStatus === 'PENDING' ? 'Ожидает' : 'Отклонён'}
-                        </span>
-                      </td>
+                      <td>₽0</td>
                       <td>
                         {inv.verificationStatus === 'APPROVED' ? (
                           <button className="btn btn-danger btn-sm" onClick={() => showToast('Инвестор приостановлен', '⚠️')}>Приостановить</button>
@@ -463,27 +455,6 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="card">
-                <h3 style={{ marginBottom: 16 }}>История транзакций</h3>
-                {commissionsData.transactions.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)' }}>Нет транзакций</div>
-                ) : (
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Дата</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {commissionsData.transactions.map((t: any) => (
-                        <tr key={t.id}>
-                          <td>{fmtDate(t.completedAt)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
             </>
           )}
         </div>
