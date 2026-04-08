@@ -54,7 +54,7 @@ export default function Home() {
         <div className="floating-card fc3">🤝 <strong style={{ color: 'var(--gold)' }}>₽ 280М+</strong> привлечено</div>
         <div className="hero-badge">🇷🇺 Первая инвест-платформа регионального рынка</div>
         <h1>Первая инвест-платформа<br />регионального рынка</h1>
-        <p>LamInvest соединяет перспективные стартапы с верифицированными инвесторами. Безопасные сделки, AI-подбор партнёров, защита от мошенничества.</p>
+        <p>LamInvest соединяет перспективные стартап с верифицированными инвесторами. Безопасные сделки, AI-подбор партнёров, защита от мошенничества.</p>
         <div className="hero-btns">
           <button className="btn btn-gold" onClick={() => openModal('register')} style={{ fontSize: '1rem', padding: '14px 36px' }}>Разместить стартап</button>
           <button className="btn btn-outline" onClick={() => openModal('register')} style={{ fontSize: '1rem', padding: '14px 36px' }}>Я инвестор</button>
