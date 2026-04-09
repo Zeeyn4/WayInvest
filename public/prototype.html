@@ -424,7 +424,7 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:48px 4
         </div>
         <div class="pkg-card" onclick="openModal('pkgModal');setPkg('elite')">
           <div class="pkg-name">Элит</div>
-          <div class="pkg-price">29 900₽<span>/мес</span></div>
+          <div class="pkg-price">24 900₽<span>/мес</span></div>
           <ul class="pkg-features">
             <li>Всё из Премиум</li>
             <li>Персональный менеджер</li>
@@ -749,7 +749,7 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:48px 4
           <div class="pkg-card" onclick="showToast('Базовый тариф — ваш текущий уровень','ℹ️')"><div class="pkg-name">Базовый</div><div class="pkg-price">0₽<span>/мес</span></div><ul class="pkg-features"><li>Профиль стартапа</li><li>Базовое описание</li><li>Каталог инвесторов</li><li class="no">AI-подбор</li></ul><button class="btn btn-ghost" style="width:100%" disabled>Текущий</button></div>
           <div class="pkg-card featured"><div class="pkg-badge">ВЫ ЗДЕСЬ</div><div class="pkg-name">Стартовый</div><div class="pkg-price">4 900₽<span>/мес</span></div><ul class="pkg-features"><li>Приоритет в поиске</li><li>Аналитика</li><li>AI-подбор</li><li class="no">Консультации</li></ul><button class="btn btn-gold" style="width:100%" disabled>Активен</button></div>
           <div class="pkg-card" onclick="openModal('upgradeModal')"><div class="pkg-name">Премиум</div><div class="pkg-price">12 900₽<span>/мес</span></div><ul class="pkg-features"><li>NDA + водяные знаки</li><li>Консультация</li><li>Высший AI-приоритет</li><li>Документы</li></ul><button class="btn btn-outline" style="width:100%">Улучшить</button></div>
-          <div class="pkg-card" onclick="openModal('upgradeModal')"><div class="pkg-name">Элит</div><div class="pkg-price">29 900₽<span>/мес</span></div><ul class="pkg-features"><li>Персональный менеджер</li><li>Закрытые питч-сессии</li><li>Топ-инвесторы</li><li>Юридическое сопровождение</li></ul><button class="btn btn-outline" style="width:100%">Элит</button></div>
+          <div class="pkg-card" onclick="openModal('upgradeModal')"><div class="pkg-name">Элит</div><div class="pkg-price">24 900₽<span>/мес</span></div><ul class="pkg-features"><li>Персональный менеджер</li><li>Закрытые питч-сессии</li><li>Топ-инвесторы</li><li>Юридическое сопровождение</li></ul><button class="btn btn-outline" style="width:100%">Элит</button></div>
         </div>
       </div>
 
@@ -1053,14 +1053,14 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:48px 4
               <tr><td>Базовый</td><td>0₽</td><td>28</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
               <tr><td>Стартовый</td><td>4 900₽</td><td>9</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
               <tr><td>Премиум</td><td>12 900₽</td><td>4</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
-              <tr><td>Элит</td><td>29 900₽</td><td>1</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
+              <tr><td>Элит</td><td>24 900₽</td><td>1</td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Редактирование тарифа','✏️')">Ред.</button></td></tr>
             </tbody></table>
           </div>
           <div class="card"><h3 style="margin-bottom:16px;">Доходность тарифов</h3>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <div><div class="flex-between" style="font-size:.85rem;margin-bottom:5px;"><span>Стартовый (×9)</span><span class="text-gold">₽44 100/мес</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div></div>
               <div><div class="flex-between" style="font-size:.85rem;margin-bottom:5px;"><span>Премиум (×4)</span><span class="text-gold">₽51 600/мес</span></div><div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div></div>
-              <div><div class="flex-between" style="font-size:.85rem;margin-bottom:5px;"><span>Элит (×1)</span><span class="text-gold">₽29 900/мес</span></div><div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div></div>
+              <div><div class="flex-between" style="font-size:.85rem;margin-bottom:5px;"><span>Элит (×1)</span><span class="text-gold">₽24 900/мес</span></div><div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div></div>
             </div>
           </div>
         </div>
@@ -1548,7 +1548,7 @@ function calcCommission() {
 
 // ============ SET PKG ============
 function setPkg(type) {
-  const names = {free:'Базовый (бесплатно)',start:'Стартовый — ₽4 900/мес',premium:'Премиум — ₽12 900/мес',elite:'Элит — ₽29 900/мес'};
+  const names = {free:'Базовый (бесплатно)',start:'Стартовый — ₽4 900/мес',premium:'Премиум — ₽12 900/мес',elite:'Элит — ₽24 900/мес'};
   const el = document.getElementById('pkgModalTitle');
   if(el) el.textContent = names[type] || 'Тариф';
 }

@@ -661,15 +661,139 @@ function PackageModal() {
 /* ------------------------------------------------------------------ */
 function UpgradeModal() {
   const { closeModal, showToast } = useApp()
+  const [amount, setAmount] = useState('12900')
+  const [cardNumber, setCardNumber] = useState('')
+  const [holder, setHolder] = useState('')
+  const [expiry, setExpiry] = useState('')
+  const [cvv, setCvv] = useState('')
+  const [isPaying, setIsPaying] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [txnId, setTxnId] = useState('')
+
+  function maskCard(v: string) {
+    return v.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ').trim()
+  }
+
+  function maskExpiry(v: string) {
+    const digits = v.replace(/\D/g, '').slice(0, 4)
+    if (digits.length < 3) return digits
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  async function handlePay() {
+    const amt = Number(amount)
+    const cardDigits = cardNumber.replace(/\D/g, '')
+    if (!Number.isFinite(amt) || amt <= 0) return showToast('Введите корректную сумму', '⚠️')
+    if (cardDigits.length < 16) return showToast('Введите полный номер карты', '⚠️')
+    if (!holder.trim()) return showToast('Введите владельца карты', '⚠️')
+    if (!/^\d{2}\/\d{2}$/.test(expiry)) return showToast('Укажите срок в формате MM/YY', '⚠️')
+    if (cvv.replace(/\D/g, '').length < 3) return showToast('Введите CVV', '⚠️')
+
+    setIsPaying(true)
+    showToast('Проверяем данные платежа...', '💳')
+    await new Promise((r) => setTimeout(r, 900))
+    showToast('Платеж выполняется...', '⏳')
+    await new Promise((r) => setTimeout(r, 1100))
+    setTxnId(`TXN-${Date.now().toString().slice(-7)}`)
+    setIsSuccess(true)
+    setIsPaying(false)
+    showToast('Тариф Премиум активирован!', '🌟')
+  }
+
   return (
-    <Overlay id="upgrade" style={{ textAlign: 'center' }}>
+    <Overlay id="upgrade" style={{ textAlign: 'center', maxWidth: 640 }}>
       <h2>Улучшить тариф</h2>
-      <p style={{ color: 'var(--text-dim)', marginBottom: 24 }}>Выберите способ оплаты для перехода на Премиум (₽12 900/мес)</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24, textAlign: 'left' }}>
-        <div style={{ padding: 14, background: 'var(--dark3)', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', gap: 12 }}><span>💳</span><span>Банковская карта</span></div>
-        <div style={{ padding: 14, background: 'var(--dark3)', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', gap: 12 }}><span>📱</span><span>Сбербанк Онлайн / СБП</span></div>
-      </div>
-      <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { closeModal(); showToast('Тариф Премиум активирован!', '🌟') }}>Оплатить ₽12 900 →</button>
+      <p style={{ color: 'var(--text-dim)', marginBottom: 24 }}>Введите сумму и реквизиты карты для перехода на Премиум</p>
+
+      {isSuccess ? (
+        <div style={{ textAlign: 'center' }}>
+          <div className="upgrade-pay-check">✓</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 6 }}>Оплата прошла успешно</div>
+          <div style={{ color: 'var(--text-dim)', marginBottom: 14 }}>Тариф <strong style={{ color: 'var(--gold)' }}>Премиум</strong> активирован</div>
+          <div style={{ background: 'var(--dark3)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', marginBottom: 16 }}>
+            ID операции: <span style={{ color: 'var(--gold)', fontFamily: 'monospace' }}>{txnId}</span>
+          </div>
+          <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} onClick={() => closeModal()}>
+            Готово
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="form-group" style={{ textAlign: 'left' }}>
+            <label>Сумма (₽)</label>
+            <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={isPaying} />
+          </div>
+          <div className="form-group" style={{ textAlign: 'left' }}>
+            <label>Номер карты</label>
+            <input
+              placeholder="0000 0000 0000 0000"
+              value={cardNumber}
+              onChange={(e) => setCardNumber(maskCard(e.target.value))}
+              maxLength={19}
+              inputMode="numeric"
+              disabled={isPaying}
+            />
+          </div>
+          <div className="form-group" style={{ textAlign: 'left' }}>
+            <label>Владелец карты</label>
+            <input
+              placeholder="IVAN IVANOV"
+              value={holder}
+              onChange={(e) => setHolder(e.target.value.toUpperCase())}
+              disabled={isPaying}
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="form-group" style={{ textAlign: 'left' }}>
+              <label>Срок (MM/YY)</label>
+              <input
+                placeholder="12/28"
+                value={expiry}
+                onChange={(e) => setExpiry(maskExpiry(e.target.value))}
+                maxLength={5}
+                inputMode="numeric"
+                disabled={isPaying}
+              />
+            </div>
+            <div className="form-group" style={{ textAlign: 'left' }}>
+              <label>CVV</label>
+              <input
+                placeholder="123"
+                value={cvv}
+                onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                maxLength={3}
+                inputMode="numeric"
+                disabled={isPaying}
+              />
+            </div>
+          </div>
+          <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} onClick={handlePay} disabled={isPaying}>
+            {isPaying ? 'Обработка платежа...' : `Оплатить ₽${Number(amount || 0).toLocaleString('ru-RU')} →`}
+          </button>
+        </>
+      )}
+      <style jsx>{`
+        .upgrade-pay-check {
+          width: 74px;
+          height: 74px;
+          margin: 0 auto 12px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2rem;
+          font-weight: 700;
+          color: #0f5132;
+          background: rgba(46, 204, 113, 0.22);
+          border: 1px solid rgba(46, 204, 113, 0.45);
+          animation: upgradeSuccessPop 420ms ease-out;
+        }
+        @keyframes upgradeSuccessPop {
+          0% { transform: scale(0.7); opacity: 0; }
+          70% { transform: scale(1.08); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </Overlay>
   )
 }

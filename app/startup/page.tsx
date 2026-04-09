@@ -19,7 +19,7 @@ import {
 } from '@/actions/startup.actions'
 import { addChatParticipant, getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
-type Panel = 'dashboard' | 'profile' | 'project' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'tariff' | 'docs'
+type Panel = 'dashboard' | 'profile' | 'project' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'tariff'
 
 const panelTitles: Record<Panel, string> = {
   dashboard: 'Дашборд',
@@ -30,7 +30,6 @@ const panelTitles: Record<Panel, string> = {
   chat: 'Чаты',
   events: 'Мероприятия',
   tariff: 'Тариф',
-  docs: 'Документы',
 }
 
 export default function StartupDashboard() {
@@ -182,11 +181,6 @@ export default function StartupDashboard() {
           case 'tariff': {
             const data = await getStartupTariff()
             if (!cancelled) setTariffData(data)
-            break
-          }
-          case 'docs': {
-            const ndas = await getStartupNdas()
-            if (!cancelled) setNdaData(ndas)
             break
           }
         }
@@ -477,9 +471,6 @@ export default function StartupDashboard() {
         <div className="sidebar-section">Настройки</div>
         <div className={`sidebar-item${activePanel === 'tariff' ? ' active' : ''}`} onClick={() => { setActivePanel('tariff'); setSidebarOpen(false) }}>
           <span className="icon">💎</span> Тариф
-        </div>
-        <div className={`sidebar-item${activePanel === 'docs' ? ' active' : ''}`} onClick={() => { setActivePanel('docs'); setSidebarOpen(false) }}>
-          <span className="icon">📄</span> Документы
         </div>
 
         <div style={{ padding: '20px 24px', marginTop: '20px', borderTop: '1px solid var(--border)' }}>
@@ -773,11 +764,30 @@ export default function StartupDashboard() {
                   </table>
                 </div>
 
-                <div className="nda-overlay">
-                  <div className="nda-icon">🔒</div>
-                  <h3>Защита NDA</h3>
-                  <p>Все документы защищены водяными знаками и доступны участникам чата после подписания NDA.</p>
-                  <button className="btn btn-gold btn-sm">Настроить доступ</button>
+                <div className="card">
+                  <h3 style={{ marginBottom: '20px', fontSize: '1rem' }}>🔒 NDA соглашения</h3>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Инвестор</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ndaData.length === 0 ? (
+                        <tr><td colSpan={3} style={{ color: 'var(--text-dim)', textAlign: 'center' }}>Нет NDA соглашений</td></tr>
+                      ) : (
+                        ndaData.map((nda: any, i: number) => (
+                          <tr key={nda.id || i}>
+                            <td>{nda.investor}</td>
+                            <td>{nda.date}</td>
+                            <td><span className={`badge ${nda.statusBadge || 'badge-green'}`}>{nda.status}</span></td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -1186,51 +1196,6 @@ export default function StartupDashboard() {
           </div>
         )}
 
-        {/* ===== DOCS ===== */}
-        <div className={`dash-panel${activePanel === 'docs' ? ' active' : ''}`}>
-          {loading && ndaData.length === 0 ? <LoadingBlock /> : (
-            <div className="grid-2">
-              <div className="card">
-                <h3 style={{ marginBottom: '20px', fontSize: '1rem' }}>📋 Пользовательское соглашение</h3>
-                <div style={{ padding: '16px', background: 'var(--dark3)', borderRadius: '10px', marginBottom: '16px' }}>
-                  <p style={{ color: 'var(--text-dim)', fontSize: '.85rem', lineHeight: '1.7' }}>
-                    Комиссия платформы составляет <strong style={{ color: 'var(--gold)' }}>8%</strong> от суммы успешной сделки. Комиссия взимается только при закрытии раунда инвестиций. Платформа обеспечивает безопасность данных и защиту интеллектуальной собственности всех участников.
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button className="btn btn-outline btn-sm">📄 Полный текст</button>
-                  <button className="btn btn-ghost btn-sm">📥 Скачать PDF</button>
-                </div>
-              </div>
-
-              <div className="card">
-                <h3 style={{ marginBottom: '20px', fontSize: '1rem' }}>🔒 NDA соглашения</h3>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Инвестор</th>
-                      <th>Дата</th>
-                      <th>Статус</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ndaData.length === 0 ? (
-                      <tr><td colSpan={3} style={{ color: 'var(--text-dim)', textAlign: 'center' }}>Нет NDA соглашений</td></tr>
-                    ) : (
-                      ndaData.map((nda: any, i: number) => (
-                        <tr key={nda.id || i}>
-                          <td>{nda.investor}</td>
-                          <td>{nda.date}</td>
-                          <td><span className={`badge ${nda.statusBadge || 'badge-green'}`}>{nda.status}</span></td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )
