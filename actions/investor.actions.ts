@@ -107,7 +107,7 @@ export async function getInvestorProfile() {
     checkMax: toRub(investor.checkMax),
     preferredStages: investor.preferredStages,
     region: investor.region,
-    rating: investor.rating,
+    rating: 0,
     totalInvested: toRub(investor.totalInvested),
     completedDeals: investor.deals.length,
     memberSince: toISO(investor.user.createdAt),

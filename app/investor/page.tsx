@@ -10,7 +10,7 @@ import {
   getInvestorDeals,
   getInvestorEvents,
 } from '@/actions/investor.actions'
-import { getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
+import { addChatParticipant, getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
 type Panel = 'dashboard' | 'profile' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'deals'
 
@@ -107,6 +107,8 @@ export default function InvestorPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
+  const [chatParticipantEmail, setChatParticipantEmail] = useState('')
+  const [chatParticipantBusy, setChatParticipantBusy] = useState(false)
 
   const chatEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -193,8 +195,24 @@ export default function InvestorPage() {
 
   const activeChat = chatList.find(c => c.chatId === activeChatId)
   const activeChatName = activeChat ? (activeChat.chatName || activeChat.partnerName) : ''
-  const isVerified = dashboardData ? true : false // derived from not throwing
-  const profileVerified = profileData?.verificationStatus === 'APPROVED'
+
+  const handleAddChatParticipant = async () => {
+    if (!activeChatId || !chatParticipantEmail.trim()) return
+    setChatParticipantBusy(true)
+    try {
+      const res = await addChatParticipant(activeChatId, chatParticipantEmail.trim())
+      setChatParticipantEmail('')
+      const list = await getChatList()
+      setChatList(list as any)
+      const msgs = await getChatMessages(activeChatId)
+      setChatMessages(msgs.map((m: any) => ({ id: m.id, text: m.content, mine: m.isMine, time: fmtTime(m.createdAt) })))
+      showToast(res.message || 'Участник добавлен', '👥')
+    } catch {
+      showToast('Не удалось добавить участника', '❌')
+    } finally {
+      setChatParticipantBusy(false)
+    }
+  }
 
   return (
     <div className="dash-layout">
@@ -203,18 +221,6 @@ export default function InvestorPage() {
       <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="sidebar-logo" onClick={() => router.push('/')}>
           Way<span>Invest</span>
-        </div>
-
-        <div style={{ padding: '16px 24px' }}>
-          {profileData?.verificationStatus === 'APPROVED' ? (
-            <span className="badge badge-green">✅ Верифицирован</span>
-          ) : profileData?.verificationStatus === 'PENDING' ? (
-            <span className="badge badge-gold">⏳ На проверке</span>
-          ) : dashboardData ? (
-            <span className="badge badge-green">✅ Верифицирован</span>
-          ) : (
-            <span className="badge badge-gold">⏳ Загрузка...</span>
-          )}
         </div>
 
         <div className="sidebar-section">Основное</div>
@@ -293,14 +299,6 @@ export default function InvestorPage() {
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>Загрузка данных...</div>
           ) : dashboardData ? (
             <>
-              <div style={{ background: 'rgba(46,204,113,.1)', border: '1px solid rgba(46,204,113,.3)', borderRadius: 12, padding: '16px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: '1.3rem' }}>✅</span>
-                <div>
-                  <div className="fw-600 text-green">Аккаунт верифицирован</div>
-                  <div className="text-dim" style={{ fontSize: '.85rem' }}>Вам доступны все функции платформы, включая AI-подбор и прямые сделки.</div>
-                </div>
-              </div>
-
               <div className="grid-4" style={{ marginBottom: 28 }}>
                 <div className="stat-box">
                   <div className="num">{dashboardData.stats.startupsViewed}</div>
@@ -372,7 +370,7 @@ export default function InvestorPage() {
               <div className="profile-header">
                 <div className="profile-avatar" style={{ background: 'linear-gradient(135deg, #3498DB, #2980B9)' }}>{initials(profileData.name)}</div>
                 <div className="profile-info">
-                  <h2>{profileData.name} {profileData.verificationStatus === 'APPROVED' && <span className="badge badge-green" style={{ marginLeft: 8, fontSize: '.7rem' }}>✅ Верифицирован</span>}</h2>
+                  <h2>{profileData.name}</h2>
                   <p>Инвестор · {profileData.sectorFocus.length > 0 ? profileData.sectorFocus.join(', ') : 'IT, Ритейл'} · Чек: {profileData.checkMin && profileData.checkMax ? `₽${fmtMoney(profileData.checkMin).replace('₽', '')}–${fmtMoney(profileData.checkMax).replace('₽', '')}` : '₽5–20М'}</p>
                   <div className="profile-stats">
                     <div className="pstat">
@@ -449,26 +447,7 @@ export default function InvestorPage() {
                         </div>
                       ))
                     ) : (
-                      <>
-                        <div style={{ padding: '16px', background: 'var(--dark3)', borderRadius: 10, border: '1px solid var(--border)' }}>
-                          <div className="flex-between" style={{ marginBottom: 8 }}>
-                            <span className="fw-600">ТехЧечня</span>
-                            <span style={{ color: 'var(--gold)', fontSize: '.85rem' }}>★★★★★</span>
-                          </div>
-                          <p className="text-dim" style={{ fontSize: '.85rem', lineHeight: 1.6 }}>
-                            Отличный инвестор! Быстро принял решение, помог с контактами и стратегией. Рекомендуем всем стартапам.
-                          </p>
-                        </div>
-                        <div style={{ padding: '16px', background: 'var(--dark3)', borderRadius: 10, border: '1px solid var(--border)' }}>
-                          <div className="flex-between" style={{ marginBottom: 8 }}>
-                            <span className="fw-600">ГрозАгро</span>
-                            <span style={{ color: 'var(--gold)', fontSize: '.85rem' }}>★★★★★</span>
-                          </div>
-                          <p className="text-dim" style={{ fontSize: '.85rem', lineHeight: 1.6 }}>
-                            Профессиональный подход, глубокое понимание рынка. Инвестировал и активно помогает с развитием бизнеса.
-                          </p>
-                        </div>
-                      </>
+                      <p className="text-dim" style={{ fontSize: '.85rem' }}>Пока нет отзывов</p>
                     )}
                   </div>
                 </div>
@@ -609,6 +588,17 @@ export default function InvestorPage() {
                     <div>
                       <div className="fw-600">{activeChatName}</div>
                       <div className="text-dim" style={{ fontSize: '.75rem' }}>Онлайн</div>
+                    </div>
+                    <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                      <input
+                        value={chatParticipantEmail}
+                        onChange={(e) => setChatParticipantEmail(e.target.value)}
+                        placeholder="email участника"
+                        style={{ height: 34, minWidth: 180, background: 'var(--dark3)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', padding: '0 10px', fontSize: '.8rem' }}
+                      />
+                      <button className="btn btn-outline btn-sm" onClick={handleAddChatParticipant} disabled={chatParticipantBusy}>
+                        {chatParticipantBusy ? '...' : '+ Участник'}
+                      </button>
                     </div>
                   </div>
                   <div className="chat-messages">

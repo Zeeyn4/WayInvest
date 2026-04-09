@@ -12,10 +12,10 @@ async function main() {
   // 1. TARIFFS
   // ============================================================
   const tariffs = [
-    { name: 'Базовый', slug: 'basic', priceMonthly: BigInt(0), features: ['Профиль стартапа', 'Базовое описание проекта', 'Доступ к каталогу инвесторов', 'Получение откликов'], isFeatured: false, sortOrder: 1 },
-    { name: 'Стартовый', slug: 'starter', priceMonthly: BigInt(490000), features: ['Всё из Базового', 'Приоритет в поиске', 'Расширенная аналитика просмотров', 'AI-подбор инвесторов', 'Статистика интереса'], isFeatured: false, sortOrder: 2 },
-    { name: 'Премиум', slug: 'premium', priceMonthly: BigInt(1290000), features: ['Всё из Стартового', 'Индивидуальная консультация', 'Помощь в оформлении документов', 'NDA + водяные знаки', 'Ограниченный доступ к файлам', 'Высший приоритет AI-подбора'], isFeatured: true, sortOrder: 3 },
-    { name: 'Элит', slug: 'elite', priceMonthly: BigInt(2990000), features: ['Всё из Премиум', 'Персональный менеджер', 'Участие в закрытых питч-сессиях', 'Featured-размещение на главной', 'Прямой выход на топ-инвесторов', 'Юридическое сопровождение сделки'], isFeatured: false, sortOrder: 4 },
+    { name: 'Базовый', slug: 'basic', priceMonthly: BigInt(0), features: ['Профиль стартапа', 'Общий чат участников без кураторов', 'Защита NDA'], isFeatured: false, sortOrder: 1 },
+    { name: 'Стандартный', slug: 'starter', priceMonthly: BigInt(490000), features: ['Базовый пакет', 'Размещение в закрытом канале с инвесторами', 'AI подбор инвесторов'], isFeatured: false, sortOrder: 2 },
+    { name: 'Премиум', slug: 'premium', priceMonthly: BigInt(1290000), features: ['Стандартный пакет', 'Аналитика: кто просматривал ваш профиль', 'Индивидуальные консультации'], isFeatured: true, sortOrder: 3 },
+    { name: 'Элит', slug: 'elite', priceMonthly: BigInt(2490000), features: ['Премиум пакет', 'Персональный менеджер', 'Юридическое сопровождение при сделке'], isFeatured: false, sortOrder: 4 },
   ]
 
   const tariffMap: Record<string, string> = {}
@@ -205,7 +205,7 @@ async function main() {
       checkMax: BigInt(2000000000),
       preferredStages: [StartupStage.PRE_SEED, StartupStage.SEED],
       region: 'Чеченская Республика, СКФО',
-      rating: 4.9,
+      rating: 0,
       totalInvested: BigInt(4200000000),
     },
   })
@@ -235,7 +235,7 @@ async function main() {
       checkMax: BigInt(800000000),
       preferredStages: [StartupStage.PRE_SEED],
       region: 'Чеченская Республика',
-      rating: 4.7,
+      rating: 0,
       totalInvested: BigInt(800000000),
     },
   })
@@ -265,7 +265,7 @@ async function main() {
       checkMax: BigInt(3000000000),
       preferredStages: [StartupStage.SEED, StartupStage.ROUND_A],
       region: 'СКФО',
-      rating: 4.8,
+      rating: 0,
       totalInvested: BigInt(0),
     },
   })
@@ -295,7 +295,7 @@ async function main() {
       checkMax: BigInt(1500000000),
       preferredStages: [StartupStage.PRE_SEED, StartupStage.SEED],
       region: 'Чеченская Республика',
-      rating: 4.6,
+      rating: 0,
       totalInvested: BigInt(0),
     },
   })

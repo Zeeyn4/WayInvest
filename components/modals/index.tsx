@@ -242,8 +242,8 @@ function RegisterModal() {
               <div className="form-group"><label>Email</label><input name="email" type="email" placeholder="investor@mail.ru" required /></div>
               <div className="form-group"><label>Пароль</label><PasswordInput minLength={6} /></div>
               <div style={{ background: 'rgba(231,76,60,.08)', border: '1px solid rgba(231,76,60,.2)', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: '.82rem', color: 'var(--text-dim)' }}>
-                ⚠️ До прохождения верификации администратором вы не можете просматривать стартапы, писать им или заключать сделки.<br /><br />
-                Комиссия платформы составляет <strong style={{ color: 'var(--gold)' }}>8%</strong> от суммы инвестиций. Данный размер фиксирован и не может быть оспорен.
+                ⚠️ Комиссия платформы составляет <strong style={{ color: 'var(--gold)' }}>8%</strong> от суммы инвестиций. Данный размер фиксирован и не может быть оспорен.<br /><br />
+                Все действия в системе логируются для юридической прозрачности сделок.
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <input type="checkbox" id="agreeInvestor" required />
@@ -317,13 +317,10 @@ function TermsModal() {
         <p><strong style={{ color: 'var(--gold)' }}>3. Запрет обходных сделок</strong><br />
         Заключение сделок, договорённостей или переводов вне платформы с целью избежать уплаты комиссии является грубым нарушением настоящего Соглашения. Нарушение влечёт <strong style={{ color: 'var(--red)' }}>немедленную блокировку профиля</strong> и может стать основанием для юридических претензий.</p>
         <br />
-        <p><strong style={{ color: 'var(--gold)' }}>4. Верификация инвесторов</strong><br />
-        Инвестор обязан пройти верификацию личности и правового статуса (ИП, ООО и т.д.) до получения доступа к профилям стартапов. До завершения верификации инвестор не имеет права просматривать материалы стартапов, вести переписку и заключать сделки.</p>
-        <br />
-        <p><strong style={{ color: 'var(--gold)' }}>5. Защита конфиденциальной информации</strong><br />
+        <p><strong style={{ color: 'var(--gold)' }}>4. Защита конфиденциальной информации</strong><br />
         Просматривая детальные материалы стартапа (финансовые показатели, техническая документация, бизнес-план), инвестор подтверждает принятие условий NDA (соглашения о неразглашении). Передача, копирование или разглашение данных материалов третьим лицам запрещена.</p>
         <br />
-        <p><strong style={{ color: 'var(--gold)' }}>6. Ответственность</strong><br />
+        <p><strong style={{ color: 'var(--gold)' }}>5. Ответственность</strong><br />
         Стартап несёт ответственность за достоверность предоставленной информации. Инвестор несёт ответственность за подлинность документов при верификации. LamInvest не является стороной инвестиционной сделки, а выступает платформой-посредником.</p>
       </div>
       <button className="btn btn-gold" style={{ marginTop: 20 }} onClick={() => { closeModal(); showToast('Соглашение принято', '✅') }}>Принять и закрыть</button>
@@ -659,7 +656,6 @@ function StartupDetailModal() {
           <p style={{ color: 'var(--text-dim)', fontSize: '.85rem' }}>Агротех • Seed • Грозный, ЧР</p>
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <span className="badge badge-gold">Премиум</span>
-            <span className="badge badge-green">Верифицирован</span>
           </div>
         </div>
       </div>

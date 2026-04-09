@@ -44,6 +44,11 @@ export async function getChatList() {
       partnerName: partner?.user.fullName ?? 'Unknown',
       partnerId: partner?.userId ?? null,
       partnerRole: partner?.user.role ?? null,
+      members: cm.chat.members.map((m) => ({
+        userId: m.userId,
+        name: m.user.fullName,
+        role: m.user.role,
+      })),
       lastMessage: lastMsg
         ? {
             content: lastMsg.content,
@@ -166,4 +171,63 @@ export async function sendMessage(chatId: string, content: string) {
     createdAt: toISO(message.createdAt),
     isMine: true,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Add participant to existing chat
+// ---------------------------------------------------------------------------
+
+export async function addChatParticipant(chatId: string, email: string) {
+  const session = await auth()
+  if (!session?.user) throw new Error('Unauthorized')
+  const userId = session.user.id
+
+  const trimmedEmail = email.trim().toLowerCase()
+  if (!trimmedEmail) throw new Error('Укажите email участника')
+
+  const membership = await prisma.chatMember.findUnique({
+    where: { chatId_userId: { chatId, userId } },
+  })
+  if (!membership) throw new Error('Access denied')
+
+  const targetUser = await prisma.user.findUnique({
+    where: { email: trimmedEmail },
+    select: { id: true, fullName: true },
+  })
+  if (!targetUser) throw new Error('Пользователь с таким email не найден')
+
+  if (targetUser.id === userId) throw new Error('Нельзя добавить себя')
+
+  const alreadyMember = await prisma.chatMember.findUnique({
+    where: { chatId_userId: { chatId, userId: targetUser.id } },
+  })
+  if (alreadyMember) {
+    return { ok: true, message: 'Участник уже в чате' }
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.chatMember.create({
+      data: {
+        chatId,
+        userId: targetUser.id,
+      },
+    })
+
+    await tx.chat.update({
+      where: { id: chatId },
+      data: {
+        isGroup: true,
+      },
+    })
+
+    await tx.message.create({
+      data: {
+        chatId,
+        senderId: userId,
+        content: `Система: ${targetUser.fullName} добавлен(а) в чат.`,
+      },
+    })
+  })
+
+  return { ok: true, message: 'Участник добавлен' }
 }

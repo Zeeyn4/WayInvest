@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/components/providers/app-provider'
 import {
@@ -11,8 +11,10 @@ import {
   getStartupTariff,
   getStartupEvents,
   getInvestorCatalog,
+  simulateTariffPayment,
+  uploadStartupProjectFile,
 } from '@/actions/startup.actions'
-import { getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
+import { addChatParticipant, getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
 type Panel = 'dashboard' | 'profile' | 'project' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'tariff' | 'docs'
 
@@ -50,22 +52,26 @@ export default function StartupDashboard() {
   const [chatInput, setChatInput] = useState('')
   const [messages, setMessages] = useState<any[]>([])
   const [activeChat, setActiveChat] = useState<string | null>(null)
+  const [chatParticipantEmail, setChatParticipantEmail] = useState('')
+  const [chatParticipantBusy, setChatParticipantBusy] = useState(false)
 
   // Events data
   const [eventsData, setEventsData] = useState<any[]>([])
 
   // Tariff data
   const [tariffData, setTariffData] = useState<any>(null)
+  const [tariffBuyBusySlug, setTariffBuyBusySlug] = useState<string | null>(null)
 
   // NDA data
   const [ndaData, setNdaData] = useState<any[]>([])
 
   // Catalog filter
   const [catalogFilter, setCatalogFilter] = useState('Все')
+  const [uploadingDoc, setUploadingDoc] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
-  const { openModal, showToast } = useApp()
+  const { showToast } = useApp()
 
   // Start or open existing chat with an investor
   async function handleStartChat(partnerUserId: string) {
@@ -196,6 +202,59 @@ export default function StartupDashboard() {
     }
   }
 
+  const addParticipantToChat = async () => {
+    if (!activeChat || !chatParticipantEmail.trim()) return
+    setChatParticipantBusy(true)
+    try {
+      const res = await addChatParticipant(activeChat, chatParticipantEmail.trim())
+      setChatParticipantEmail('')
+      const chats = await getChatList()
+      setChatList(chats)
+      const msgs = await getChatMessages(activeChat)
+      setMessages(msgs)
+      showToast(res.message || 'Участник добавлен', '👥')
+    } catch {
+      showToast('Не удалось добавить участника', '❌')
+    } finally {
+      setChatParticipantBusy(false)
+    }
+  }
+
+  const buyTariff = async (slug: string, name: string) => {
+    setTariffBuyBusySlug(slug)
+    try {
+      const res = await simulateTariffPayment(slug)
+      showToast(res.message || `Тариф ${name} активирован`, '💳')
+      const data = await getStartupTariff()
+      setTariffData(data)
+    } catch {
+      showToast('Не удалось выполнить оплату тарифа', '❌')
+    } finally {
+      setTariffBuyBusySlug(null)
+    }
+  }
+
+  const uploadProjectDocument = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setUploadingDoc(true)
+    try {
+      await uploadStartupProjectFile({
+        fileName: file.name,
+        fileSizeMb: Number((file.size / (1024 * 1024)).toFixed(2)),
+        accessLevel: 'nda',
+      })
+      const docs = await getStartupDocuments()
+      setDocumentsData(docs)
+      showToast('Файл загружен', '📎')
+    } catch {
+      showToast('Ошибка загрузки файла', '❌')
+    } finally {
+      setUploadingDoc(false)
+      event.target.value = ''
+    }
+  }
+
   const filters = ['Все', 'IT', 'Ритейл', 'Финтех', 'Pre-seed', 'Seed']
 
   const activeChatData = chatList.find((c: any) => c.chatId === activeChat)
@@ -243,7 +302,7 @@ export default function StartupDashboard() {
 
         <div className="sidebar-section">Настройки</div>
         <div className={`sidebar-item${activePanel === 'tariff' ? ' active' : ''}`} onClick={() => { setActivePanel('tariff'); setSidebarOpen(false) }}>
-          <span className="icon">💎</span> Тариф
+          <span className="icon">💎</span> Тарифы и подписка
         </div>
         <div className={`sidebar-item${activePanel === 'docs' ? ' active' : ''}`} onClick={() => { setActivePanel('docs'); setSidebarOpen(false) }}>
           <span className="icon">📄</span> Документы
@@ -400,24 +459,6 @@ export default function StartupDashboard() {
                 </div>
 
                 <div>
-                  <div className="card" style={{ marginBottom: '20px' }}>
-                    <h3 style={{ marginBottom: '20px', fontSize: '1rem' }}>👥 Команда</h3>
-                    {(profileData.team ?? []).length === 0 ? (
-                      <p style={{ color: 'var(--text-dim)', fontSize: '.85rem' }}>Команда не добавлена</p>
-                    ) : (
-                      profileData.team.map((member: any, i: number) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px', padding: '12px', background: 'var(--dark3)', borderRadius: '10px' }}>
-                          <div className="avatar">{member.initials || member.name?.split(' ').map((w: string) => w[0]).join('') || '??'}</div>
-                          <div>
-                            <div className="fw-600" style={{ fontSize: '.9rem' }}>{member.name}</div>
-                            <div style={{ color: 'var(--text-dim)', fontSize: '.8rem' }}>{member.role}</div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                    <button className="btn btn-outline btn-sm mt-16" style={{ width: '100%' }}>+ Добавить участника</button>
-                  </div>
-
                   <div className="card">
                     <h3 style={{ marginBottom: '16px', fontSize: '1rem' }}>🏷️ Теги</h3>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -456,7 +497,10 @@ export default function StartupDashboard() {
                     </div>
                   ))
                 )}
-                <button className="btn btn-outline btn-sm mt-16" style={{ width: '100%' }}>+ Загрузить документ</button>
+                <label className="btn btn-outline btn-sm mt-16" style={{ width: '100%', justifyContent: 'center', cursor: uploadingDoc ? 'not-allowed' : 'pointer', opacity: uploadingDoc ? 0.6 : 1 }}>
+                  {uploadingDoc ? 'Загрузка...' : '+ Загрузить документ'}
+                  <input type="file" style={{ display: 'none' }} onChange={uploadProjectDocument} disabled={uploadingDoc} />
+                </label>
               </div>
 
               <div>
@@ -489,7 +533,7 @@ export default function StartupDashboard() {
                 <div className="nda-overlay">
                   <div className="nda-icon">🔒</div>
                   <h3>Защита NDA</h3>
-                  <p>Все документы защищены водяными знаками и доступны только верифицированным инвесторам после подписания NDA.</p>
+                  <p>Все документы защищены водяными знаками и доступны участникам чата после подписания NDA.</p>
                   <button className="btn btn-gold btn-sm">Настроить доступ</button>
                 </div>
               </div>
@@ -637,8 +681,19 @@ export default function StartupDashboard() {
                       <div>
                         <div className="fw-600" style={{ fontSize: '.9rem' }}>{activeChatData.chatName || activeChatData.partnerName}</div>
                         <div style={{ color: 'var(--text-dim)', fontSize: '.75rem' }}>
-                          {activeChatData.partnerRole === 'INVESTOR' ? '● Верифицированный инвестор' : '● Стартап'}
+                          {activeChatData.partnerRole === 'INVESTOR' ? '● Инвестор' : '● Стартап'}
                         </div>
+                      </div>
+                      <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                        <input
+                          value={chatParticipantEmail}
+                          onChange={(e) => setChatParticipantEmail(e.target.value)}
+                          placeholder="email участника"
+                          style={{ height: 34, minWidth: 180, background: 'var(--dark3)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', padding: '0 10px', fontSize: '.8rem' }}
+                        />
+                        <button className="btn btn-outline btn-sm" onClick={addParticipantToChat} disabled={chatParticipantBusy}>
+                          {chatParticipantBusy ? '...' : '+ Участник'}
+                        </button>
                       </div>
                     </div>
                     <div className="chat-messages">
@@ -704,6 +759,9 @@ export default function StartupDashboard() {
               <div className="commission-notice">
                 <strong>Комиссия платформы: 8%</strong> от суммы сделки взимается только при успешном закрытии инвестиционного раунда. Никаких скрытых платежей.
               </div>
+              <div style={{ marginBottom: 20, color: 'var(--text-dim)', fontSize: '.9rem' }}>
+                Раздел подписки для стартапов: выберите пакет и оформите покупку. Оплата ниже работает как безопасная имитация с серверной фиксацией.
+              </div>
 
               <div className="grid-4">
                 {(tariffData?.plans ?? []).map((plan: any, i: number) => (
@@ -717,15 +775,19 @@ export default function StartupDashboard() {
                     </div>
                     <ul className="pkg-features">
                       {(plan.features ?? []).map((f: any, fi: number) => (
-                        <li key={fi} className={f.included === false ? 'no' : ''}>{f.text}</li>
+                        <li key={fi} className={f?.included === false ? 'no' : ''}>{typeof f === 'string' ? f : f.text}</li>
                       ))}
                     </ul>
                     {plan.isCurrent ? (
                       <button className="btn btn-gold btn-sm" style={{ width: '100%' }} disabled>Активен</button>
                     ) : plan.price === 0 ? (
-                      <button className="btn btn-ghost btn-sm" style={{ width: '100%' }} disabled>Текущий</button>
+                      <button className="btn btn-ghost btn-sm" style={{ width: '100%' }} onClick={() => buyTariff(plan.slug, plan.name)} disabled={tariffBuyBusySlug === plan.slug}>
+                        {tariffBuyBusySlug === plan.slug ? 'Подключение...' : 'Подключить'}
+                      </button>
                     ) : (
-                      <button className="btn btn-gold btn-sm" style={{ width: '100%' }} onClick={() => openModal('upgrade')}>Перейти</button>
+                      <button className="btn btn-gold btn-sm" style={{ width: '100%' }} onClick={() => buyTariff(plan.slug, plan.name)} disabled={tariffBuyBusySlug === plan.slug}>
+                        {tariffBuyBusySlug === plan.slug ? 'Оплата...' : 'Оплатить и подключить'}
+                      </button>
                     )}
                   </div>
                 ))}
