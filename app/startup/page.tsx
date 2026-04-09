@@ -13,6 +13,7 @@ import {
   getInvestorCatalog,
   simulateTariffPayment,
   uploadStartupProjectFile,
+  createStartupInvestorReview,
 } from '@/actions/startup.actions'
 import { addChatParticipant, getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
@@ -77,6 +78,10 @@ export default function StartupDashboard() {
   // Catalog filter
   const [catalogFilter, setCatalogFilter] = useState('Все')
   const [uploadingDoc, setUploadingDoc] = useState(false)
+  const [reviewTarget, setReviewTarget] = useState<{ investorId: string; investorName: string } | null>(null)
+  const [reviewText, setReviewText] = useState('')
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewBusy, setReviewBusy] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -121,8 +126,14 @@ export default function StartupDashboard() {
             break
           }
           case 'profile': {
-            const data = await getStartupProfile()
-            if (!cancelled) setProfileData(data)
+            const [profile, docs] = await Promise.all([
+              getStartupProfile(),
+              documentsData ? Promise.resolve(documentsData) : getStartupDocuments(),
+            ])
+            if (!cancelled) {
+              setProfileData(profile)
+              if (!documentsData) setDocumentsData(docs)
+            }
             break
           }
           case 'project': {
@@ -333,6 +344,42 @@ export default function StartupDashboard() {
     }
   }
 
+  const viewProfileMaterial = (file: any) => {
+    if (!file?.fileUrl) {
+      showToast('Ссылка на файл недоступна', '⚠️')
+      return
+    }
+    window.open(file.fileUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const openReviewModal = (investorId: string, investorName: string) => {
+    setReviewTarget({ investorId, investorName })
+    setReviewText('')
+    setReviewRating(5)
+  }
+
+  const submitReview = async () => {
+    if (!reviewTarget) return
+    if (!reviewText.trim()) {
+      showToast('Введите текст отзыва', '⚠️')
+      return
+    }
+    setReviewBusy(true)
+    try {
+      await createStartupInvestorReview({
+        investorId: reviewTarget.investorId,
+        text: reviewText,
+        rating: reviewRating,
+      })
+      showToast('Отзыв отправлен', '✅')
+      setReviewTarget(null)
+    } catch {
+      showToast('Не удалось отправить отзыв', '❌')
+    } finally {
+      setReviewBusy(false)
+    }
+  }
+
   const filters = ['Все', 'IT', 'Ритейл', 'Финтех', 'Pre-seed', 'Seed']
 
   const activeChatData = chatList.find((c: any) => c.chatId === activeChat)
@@ -537,6 +584,27 @@ export default function StartupDashboard() {
                 </div>
 
                 <div>
+                  <div className="card" style={{ marginBottom: '20px' }}>
+                    <h3 style={{ marginBottom: '16px', fontSize: '1rem' }}>📎 Материалы проекта</h3>
+                    {(documentsData?.files ?? []).length === 0 ? (
+                      <p style={{ color: 'var(--text-dim)', fontSize: '.85rem' }}>Материалы не загружены</p>
+                    ) : (
+                      (documentsData?.files ?? []).slice(0, 5).map((file: any) => (
+                        <div key={file.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+                          <span style={{ fontSize: '1.1rem' }}>{file.icon || '📄'}</span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div className="fw-600" style={{ fontSize: '.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</div>
+                            <div style={{ color: 'var(--text-dim)', fontSize: '.75rem' }}>{file.size} • {file.date}</div>
+                          </div>
+                          <button className="btn btn-outline btn-sm" onClick={() => viewProfileMaterial(file)}>Открыть</button>
+                        </div>
+                      ))
+                    )}
+                    <button className="btn btn-ghost btn-sm mt-16" style={{ width: '100%' }} onClick={() => setActivePanel('project')}>
+                      Перейти в «Мой проект»
+                    </button>
+                  </div>
+
                   <div className="card">
                     <h3 style={{ marginBottom: '16px', fontSize: '1rem' }}>🏷️ Теги</h3>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -657,6 +725,7 @@ export default function StartupDashboard() {
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       <div style={{ color: 'var(--gold)', fontSize: '.8rem', marginBottom: '8px' }}>⭐ {inv.rating}</div>
                       <button className="btn btn-gold btn-sm" onClick={() => handleStartChat(inv.userId)}>💬 Написать</button>
+                      <button className="btn btn-outline btn-sm" style={{ marginTop: 8 }} onClick={() => openReviewModal(inv.id, inv.name)}>✍️ Отзыв</button>
                     </div>
                   </div>
                 ))
@@ -717,7 +786,10 @@ export default function StartupDashboard() {
                           <div style={{ color: 'var(--text-dim)', fontSize: '.72rem' }}>Рейтинг</div>
                           <div className="fw-600" style={{ color: 'var(--gold)', fontSize: '.9rem' }}>⭐ {inv.rating}</div>
                         </div>
-                        <button className="btn btn-outline btn-sm" onClick={() => handleStartChat(inv.userId)}>💬 Написать</button>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleStartChat(inv.userId)}>💬 Написать</button>
+                          <button className="btn btn-ghost btn-sm" onClick={() => openReviewModal(inv.id, inv.name)}>✍️ Отзыв</button>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -978,6 +1050,41 @@ export default function StartupDashboard() {
                   100% { transform: scale(1); opacity: 1; }
                 }
               `}</style>
+            </div>
+          </div>
+        )}
+
+        {/* Review modal */}
+        {reviewTarget && (
+          <div className="modal-overlay active" onClick={(e) => { if (e.target === e.currentTarget && !reviewBusy) setReviewTarget(null) }}>
+            <div className="modal" style={{ maxWidth: 620 }}>
+              <button className="modal-close" onClick={() => !reviewBusy && setReviewTarget(null)}>✕</button>
+              <h2>Отзыв инвестору</h2>
+              <p style={{ color: 'var(--text-dim)', marginBottom: 18 }}>
+                Инвестор: <strong style={{ color: 'var(--gold)' }}>{reviewTarget.investorName}</strong>
+              </p>
+              <div className="form-group">
+                <label>Оценка</label>
+                <select value={reviewRating} onChange={(e) => setReviewRating(Number(e.target.value))} disabled={reviewBusy}>
+                  <option value={5}>5 — Отлично</option>
+                  <option value={4}>4 — Хорошо</option>
+                  <option value={3}>3 — Нормально</option>
+                  <option value={2}>2 — Слабо</option>
+                  <option value={1}>1 — Плохо</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Текст отзыва</label>
+                <textarea
+                  placeholder="Опишите опыт взаимодействия с инвестором..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  disabled={reviewBusy}
+                />
+              </div>
+              <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} onClick={submitReview} disabled={reviewBusy}>
+                {reviewBusy ? 'Отправка...' : 'Отправить отзыв'}
+              </button>
             </div>
           </div>
         )}

@@ -94,6 +94,28 @@ export async function getInvestorProfile() {
 
   if (!investor) throw new Error('Investor not found')
 
+  const reviewLogs = await prisma.auditLog.findMany({
+    where: {
+      action: 'STARTUP_REVIEW_CREATED',
+      entity: 'investor',
+      entityId: investor.id,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+  })
+
+  const reviews = reviewLogs
+    .map((log) => {
+      const meta = (log.meta ?? {}) as Record<string, unknown>
+      const author = typeof meta.author === 'string' ? meta.author : 'Стартап'
+      const text = typeof meta.text === 'string' ? meta.text : ''
+      const ratingRaw = typeof meta.rating === 'number' ? meta.rating : 0
+      const rating = Math.max(1, Math.min(5, Math.round(ratingRaw)))
+      if (!text) return null
+      return { author, text, rating }
+    })
+    .filter(Boolean) as { author: string; text: string; rating: number }[]
+
   return {
     id: investor.id,
     name: investor.user.fullName,
@@ -111,7 +133,7 @@ export async function getInvestorProfile() {
     totalInvested: toRub(investor.totalInvested),
     completedDeals: investor.deals.length,
     memberSince: toISO(investor.user.createdAt),
-    reviews: [] as { author: string; text: string; rating: number }[], // placeholder
+    reviews,
   }
 }
 

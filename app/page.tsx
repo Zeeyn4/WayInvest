@@ -173,7 +173,7 @@ export default function Home() {
             {/* Элит */}
             <div className="pkg-card" onClick={() => openModal('package')}>
               <div className="pkg-name">Элит</div>
-              <div className="pkg-price">29 900₽<span>/мес</span></div>
+              <div className="pkg-price">24 900₽<span>/мес</span></div>
               <ul className="pkg-features">
                 <li>Всё из Премиум</li>
                 <li>Персональный менеджер</li>

@@ -14,7 +14,7 @@ import {
   rejectInvestor,
 } from '@/actions/admin.actions'
 
-type Panel = 'dashboard' | 'startups' | 'investors' | 'events' | 'commissions' | 'tariffs'
+type Panel = 'dashboard' | 'startups' | 'investors' | 'events' | 'commissions' | 'tariffs' | 'incomingFunds'
 
 const panelTitles: Record<Panel, string> = {
   dashboard: 'Обзор платформы',
@@ -23,6 +23,7 @@ const panelTitles: Record<Panel, string> = {
   events: 'Мероприятия',
   commissions: 'Комиссии',
   tariffs: 'Тарифы',
+  incomingFunds: 'Входящие средства',
 }
 
 // --- helpers -----------------------------------------------------------------
@@ -106,6 +107,8 @@ export default function AdminPage() {
       getAdminCommissions().then(setCommissionsData).catch(() => {})
     } else if (activePanel === 'tariffs' && !tariffsData) {
       getAdminTariffs().then(setTariffsData).catch(() => {})
+    } else if (activePanel === 'incomingFunds' && !commissionsData) {
+      getAdminCommissions().then(setCommissionsData).catch(() => {})
     }
   }, [activePanel])
 
@@ -183,6 +186,12 @@ export default function AdminPage() {
           onClick={() => { setActivePanel('tariffs'); setSidebarOpen(false) }}
         >
           <span className="icon">📦</span> Тарифы
+        </div>
+        <div
+          className={`sidebar-item ${activePanel === 'incomingFunds' ? 'active' : ''}`}
+          onClick={() => { setActivePanel('incomingFunds'); setSidebarOpen(false) }}
+        >
+          <span className="icon">💸</span> Входящие средства
         </div>
 
         <div className="sidebar-section" />
@@ -522,6 +531,102 @@ export default function AdminPage() {
                 })()}
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Incoming Funds Panel */}
+        <div className={`dash-panel ${activePanel === 'incomingFunds' ? 'active' : ''}`}>
+          {!commissionsData ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>Загрузка входящих средств...</div>
+          ) : (
+            <>
+              <div className="card" style={{ marginBottom: 20 }}>
+                <h3 style={{ marginBottom: 6 }}>🦋 Входящие инвестиционные средства</h3>
+                <div className="text-dim" style={{ fontSize: '.85rem' }}>
+                  Средства сначала поступают на счёт LamInvest. Затем мы удерживаем 8% комиссии и переводим 92% стартапу.
+                </div>
+              </div>
+
+              <div className="grid-4" style={{ marginBottom: 20 }}>
+                <div className="stat-box">
+                  <div className="num">₽0</div>
+                  <div className="lbl">ожидают обработки</div>
+                </div>
+                <div className="stat-box">
+                  <div className="num">₽0</div>
+                  <div className="lbl">комиссия LamInvest (8%)</div>
+                </div>
+                <div className="stat-box">
+                  <div className="num">₽0</div>
+                  <div className="lbl">переведено стартапам (92%)</div>
+                </div>
+                <div className="stat-box">
+                  <div className="num">0</div>
+                  <div className="lbl">сделок обработано</div>
+                </div>
+              </div>
+
+              <div className="card" style={{ marginBottom: 20 }}>
+                <div className="flex-between" style={{ marginBottom: 12 }}>
+                  <h3>Таблица поступивших средств</h3>
+                  <span className="badge badge-gold">Пусто — ожидаем первые сделки</span>
+                </div>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>№ сделки</th>
+                      <th>Инвестор</th>
+                      <th>Стартап</th>
+                      <th>Сумма от инвестора</th>
+                      <th>Комиссия LamInvest (8%)</th>
+                      <th>К переводу стартапу (92%)</th>
+                      <th>Дата поступления</th>
+                      <th>Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {commissionsData.transactions.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '22px 12px' }}>
+                          🦋 Сделок пока нет. Здесь будут отображаться все поступившие средства.
+                        </td>
+                      </tr>
+                    ) : (
+                      commissionsData.transactions.map((t: any, i: number) => (
+                        <tr key={t.id}>
+                          <td>{i + 1}</td>
+                          <td>{t.investorName}</td>
+                          <td>{t.startupName}</td>
+                          <td>₽0</td>
+                          <td>₽0</td>
+                          <td>₽0</td>
+                          <td>{fmtDate(t.completedAt)}</td>
+                          <td><span className="badge badge-green">Обработано</span></td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="card">
+                <h3 style={{ marginBottom: 14 }}>📌 Схема работы с платежами</h3>
+                <div className="grid-3">
+                  <div className="stat-box">
+                    <div className="num">1</div>
+                    <div className="lbl">Инвестор переводит 100%</div>
+                  </div>
+                  <div className="stat-box">
+                    <div className="num">2</div>
+                    <div className="lbl">LamInvest удерживает 8%</div>
+                  </div>
+                  <div className="stat-box">
+                    <div className="num">3</div>
+                    <div className="lbl">Стартап получает 92%</div>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </main>

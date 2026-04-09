@@ -364,6 +364,7 @@ export async function getStartupDocuments() {
     name: doc.fileName,
     size: `${(doc.fileSizeMb ?? 0).toFixed(1)} MB`,
     date: fmtDate(doc.uploadedAt),
+    fileUrl: doc.fileUrl,
     accessLevel: doc.accessLevel,
   }))
 
@@ -584,4 +585,49 @@ export async function uploadStartupProjectFile(params: {
   })
 
   return { ok: true, id: document.id }
+}
+
+// ---------------------------------------------------------------------------
+// Startup -> Investor review
+// ---------------------------------------------------------------------------
+
+export async function createStartupInvestorReview(params: {
+  investorId: string
+  text: string
+  rating: number
+}) {
+  const userId = await requireStartup()
+  const startup = await prisma.startup.findUnique({
+    where: { userId },
+    select: { id: true, name: true },
+  })
+  if (!startup) throw new Error('Startup not found')
+
+  const investor = await prisma.investor.findUnique({
+    where: { id: params.investorId },
+    select: { id: true },
+  })
+  if (!investor) throw new Error('Investor not found')
+
+  const text = params.text.trim()
+  if (!text) throw new Error('Текст отзыва пустой')
+
+  const rating = Math.max(1, Math.min(5, Math.round(params.rating)))
+
+  await prisma.auditLog.create({
+    data: {
+      userId,
+      action: 'STARTUP_REVIEW_CREATED',
+      entity: 'investor',
+      entityId: investor.id,
+      meta: {
+        startupId: startup.id,
+        author: startup.name,
+        text,
+        rating,
+      },
+    },
+  })
+
+  return { ok: true }
 }
