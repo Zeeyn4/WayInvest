@@ -3,6 +3,7 @@
 import { hash } from 'bcryptjs'
 import { prisma } from '@/lib/db/prisma'
 import { signIn } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { registerStartupSchema, registerInvestorSchema, loginSchema } from '@/lib/validators/auth'
 import { Role } from '@prisma/client'
 import { sendVerificationCode } from '@/lib/services/email.service'
@@ -233,4 +234,45 @@ export async function loginUser(formData: FormData): Promise<ActionResult> {
   }
 
   return { success: true, redirect: redirectMap[user.role] || '/' }
+}
+
+export async function saveStartupRequisitesAfterSignup(formData: FormData): Promise<ActionResult> {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'STARTUP') {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const startup = await prisma.startup.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  })
+  if (!startup) {
+    return { success: false, error: 'Startup not found' }
+  }
+
+  const phone = String(formData.get('phone') || '').trim()
+  const bankName = String(formData.get('bankName') || '').trim()
+  const accountNumber = String(formData.get('accountNumber') || '').trim()
+  const accountHolder = String(formData.get('accountHolder') || '').trim()
+
+  if (!phone || !bankName || !accountNumber || !accountHolder) {
+    return { success: false, error: 'Заполните все реквизиты' }
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      userId: session.user.id,
+      action: 'STARTUP_REQUISITES_SAVED',
+      entity: 'startup',
+      entityId: startup.id,
+      meta: {
+        phone,
+        bankName,
+        accountNumber,
+        accountHolder,
+      },
+    },
+  })
+
+  return { success: true, redirect: '/startup' }
 }

@@ -10,11 +10,12 @@ import {
   getAdminEvents,
   getAdminCommissions,
   getAdminTariffs,
+  getAdminStartupRequisites,
   approveInvestor,
   rejectInvestor,
 } from '@/actions/admin.actions'
 
-type Panel = 'dashboard' | 'startups' | 'investors' | 'events' | 'commissions' | 'tariffs' | 'incomingFunds'
+type Panel = 'dashboard' | 'startups' | 'investors' | 'events' | 'commissions' | 'tariffs' | 'incomingFunds' | 'startupRequisites'
 
 const panelTitles: Record<Panel, string> = {
   dashboard: 'Обзор платформы',
@@ -24,6 +25,7 @@ const panelTitles: Record<Panel, string> = {
   commissions: 'Комиссии',
   tariffs: 'Тарифы',
   incomingFunds: 'Входящие средства',
+  startupRequisites: 'Реквизиты стартапов',
 }
 
 // --- helpers -----------------------------------------------------------------
@@ -86,6 +88,7 @@ export default function AdminPage() {
   const [eventsData, setEventsData] = useState<any[]>([])
   const [commissionsData, setCommissionsData] = useState<any>(null)
   const [tariffsData, setTariffsData] = useState<any[] | null>(null)
+  const [startupRequisitesData, setStartupRequisitesData] = useState<any[] | null>(null)
 
   // Load dashboard on mount
   useEffect(() => {
@@ -109,6 +112,8 @@ export default function AdminPage() {
       getAdminTariffs().then(setTariffsData).catch(() => {})
     } else if (activePanel === 'incomingFunds' && !commissionsData) {
       getAdminCommissions().then(setCommissionsData).catch(() => {})
+    } else if (activePanel === 'startupRequisites' && !startupRequisitesData) {
+      getAdminStartupRequisites().then(setStartupRequisitesData).catch(() => {})
     }
   }, [activePanel])
 
@@ -192,6 +197,12 @@ export default function AdminPage() {
           onClick={() => { setActivePanel('incomingFunds'); setSidebarOpen(false) }}
         >
           <span className="icon">💸</span> Входящие средства
+        </div>
+        <div
+          className={`sidebar-item ${activePanel === 'startupRequisites' ? 'active' : ''}`}
+          onClick={() => { setActivePanel('startupRequisites'); setSidebarOpen(false) }}
+        >
+          <span className="icon">📄</span> Реквизиты стартапов
         </div>
 
         <div className="sidebar-section" />
@@ -625,6 +636,66 @@ export default function AdminPage() {
                     <div className="lbl">Стартап получает 92%</div>
                   </div>
                 </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Startup Requisites Panel */}
+        <div className={`dash-panel ${activePanel === 'startupRequisites' ? 'active' : ''}`}>
+          {!startupRequisitesData ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>Загрузка реквизитов стартапов...</div>
+          ) : (
+            <>
+              <div className="card" style={{ marginBottom: 20 }}>
+                <h3 style={{ marginBottom: 6 }}>📁 Реквизиты и контакты стартапов</h3>
+                <div className="text-dim" style={{ fontSize: '.85rem' }}>
+                  Здесь отображаются банковские реквизиты и контакты для перевода средств стартапам.
+                </div>
+              </div>
+              <div className="card">
+                <div className="flex-between" style={{ marginBottom: 12 }}>
+                  <h3>Зарегистрированные стартапы</h3>
+                  <span className="badge badge-blue">{startupRequisitesData.length} записей</span>
+                </div>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Стартап</th>
+                      <th>Основатель</th>
+                      <th>Телефон</th>
+                      <th>Банк</th>
+                      <th>Номер карты / счёта</th>
+                      <th>ФИО держателя</th>
+                      <th>Действие</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {startupRequisitesData.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '18px 12px' }}>
+                          Нет данных. Стартапы ещё не заполнили реквизиты.
+                        </td>
+                      </tr>
+                    ) : (
+                      startupRequisitesData.map((row: any) => (
+                        <tr key={row.startupId}>
+                          <td className="fw-600">{row.startupName}</td>
+                          <td>{row.founderName}</td>
+                          <td>{row.phone}</td>
+                          <td>{row.bankName}</td>
+                          <td style={{ fontFamily: 'monospace' }}>{row.accountNumber}</td>
+                          <td>{row.accountHolder}</td>
+                          <td>
+                            <button className="btn btn-gold btn-sm" onClick={() => showToast('Контакт скопирован', '📋')}>
+                              Контакт
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </>
           )}

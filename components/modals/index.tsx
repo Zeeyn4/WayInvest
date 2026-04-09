@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/components/providers/app-provider'
-import { registerStartup, registerInvestor, loginUser, sendEmailCode, verifyEmailCode } from '@/actions/auth.actions'
+import { registerStartup, registerInvestor, loginUser, saveStartupRequisitesAfterSignup, sendEmailCode, verifyEmailCode } from '@/actions/auth.actions'
 
 /* ------------------------------------------------------------------ */
 /*  Password input with toggle                                         */
@@ -103,12 +103,18 @@ function RegisterModal() {
   const { closeModal, openModal, showToast } = useApp()
   const router = useRouter()
   const [tab, setTab] = useState(0)
-  const [step, setStep] = useState<'form' | 'code'>('form')
+  const [step, setStep] = useState<'form' | 'code' | 'startupRequisites'>('form')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const [savedEmail, setSavedEmail] = useState('')
   const [savedFormData, setSavedFormData] = useState<FormData | null>(null)
   const [code, setCode] = useState('')
+  const [startupReq, setStartupReq] = useState({
+    phone: '',
+    bankName: '',
+    accountNumber: '',
+    accountHolder: '',
+  })
 
   function resetState() {
     setStep('form')
@@ -116,6 +122,12 @@ function RegisterModal() {
     setCode('')
     setSavedEmail('')
     setSavedFormData(null)
+    setStartupReq({
+      phone: '',
+      bankName: '',
+      accountNumber: '',
+      accountHolder: '',
+    })
   }
 
   // Step 1: Validate form & send code
@@ -165,15 +177,16 @@ function RegisterModal() {
         return
       }
 
-      closeModal()
-      resetState()
       if (formType === 'startup') {
-        showToast('Стартап зарегистрирован! Добро пожаловать!', '🚀')
+        setStep('startupRequisites')
+        showToast('Email подтвержден. Заполните реквизиты стартапа.', '🏦')
       } else {
+        closeModal()
+        resetState()
         showToast('Регистрация прошла успешно!', '📋')
+        router.push(result.redirect || '/')
+        router.refresh()
       }
-      router.push(result.redirect || '/')
-      router.refresh()
     })
   }
 
@@ -183,6 +196,32 @@ function RegisterModal() {
       const result = await sendEmailCode(savedEmail)
       if (result.success) showToast('Код отправлен повторно', '📧')
       else setError(result.error || 'Ошибка')
+    })
+  }
+
+  function handleSaveStartupRequisites() {
+    setError('')
+    if (!startupReq.phone.trim() || !startupReq.bankName.trim() || !startupReq.accountNumber.trim() || !startupReq.accountHolder.trim()) {
+      setError('Заполните все реквизиты')
+      return
+    }
+    const fd = new FormData()
+    fd.set('phone', startupReq.phone.trim())
+    fd.set('bankName', startupReq.bankName.trim())
+    fd.set('accountNumber', startupReq.accountNumber.trim())
+    fd.set('accountHolder', startupReq.accountHolder.trim())
+
+    startTransition(async () => {
+      const result = await saveStartupRequisitesAfterSignup(fd)
+      if (!result.success) {
+        setError(result.error || 'Ошибка сохранения реквизитов')
+        return
+      }
+      closeModal()
+      resetState()
+      showToast('Стартап зарегистрирован! Добро пожаловать!', '🚀')
+      router.push(result.redirect || '/startup')
+      router.refresh()
     })
   }
 
@@ -293,6 +332,57 @@ function RegisterModal() {
           </div>
 
           <p style={{ color: 'var(--text-dim)', fontSize: '.75rem', marginTop: 16 }}>Код действителен 10 минут</p>
+        </div>
+      )}
+
+      {/* Startup requisites step */}
+      {step === 'startupRequisites' && (
+        <div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: 10, color: 'var(--gold)' }}>Реквизиты для получения инвестиций</div>
+          <p style={{ color: 'var(--text-dim)', fontSize: '.85rem', marginBottom: 18 }}>
+            После подтверждения email укажите банковские реквизиты стартапа. Эти данные будут доступны администратору для переводов.
+          </p>
+          {error && <div style={{ color: 'var(--red)', fontSize: '.85rem', marginBottom: 16 }}>{error}</div>}
+          <div className="form-group">
+            <label>Телефон</label>
+            <input
+              placeholder="+7 (900) 000-00-00"
+              value={startupReq.phone}
+              onChange={(e) => setStartupReq((s) => ({ ...s, phone: e.target.value }))}
+            />
+          </div>
+          <div className="form-group">
+            <label>Банк</label>
+            <input
+              placeholder="Сбербанк / Т-Банк / ВТБ..."
+              value={startupReq.bankName}
+              onChange={(e) => setStartupReq((s) => ({ ...s, bankName: e.target.value }))}
+            />
+          </div>
+          <div className="form-group">
+            <label>Номер карты / счёта</label>
+            <input
+              placeholder="0000 0000 0000 0000"
+              value={startupReq.accountNumber}
+              onChange={(e) => setStartupReq((s) => ({ ...s, accountNumber: e.target.value }))}
+            />
+          </div>
+          <div className="form-group">
+            <label>ФИО держателя счёта</label>
+            <input
+              placeholder="Иванов Иван Иванович"
+              value={startupReq.accountHolder}
+              onChange={(e) => setStartupReq((s) => ({ ...s, accountHolder: e.target.value }))}
+            />
+          </div>
+          <button
+            className="btn btn-gold"
+            style={{ width: '100%', justifyContent: 'center', marginBottom: 10 }}
+            onClick={handleSaveStartupRequisites}
+            disabled={isPending}
+          >
+            {isPending ? 'Сохранение...' : 'Сохранить реквизиты и продолжить'}
+          </button>
         </div>
       )}
     </Overlay>

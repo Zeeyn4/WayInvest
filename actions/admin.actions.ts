@@ -262,6 +262,49 @@ export async function getAdminTariffs() {
   }))
 }
 
+export async function getAdminStartupRequisites() {
+  await requireAdmin()
+
+  const startups = await prisma.startup.findMany({
+    include: {
+      user: { select: { fullName: true, email: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const requisitesLogs = await prisma.auditLog.findMany({
+    where: {
+      action: 'STARTUP_REQUISITES_SAVED',
+      entity: 'startup',
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 500,
+  })
+
+  const latestByStartupId = new Map<string, any>()
+  for (const log of requisitesLogs) {
+    if (!log.entityId || latestByStartupId.has(log.entityId)) continue
+    latestByStartupId.set(log.entityId, log)
+  }
+
+  return startups.map((s) => {
+    const log = latestByStartupId.get(s.id)
+    const meta = (log?.meta ?? {}) as Record<string, unknown>
+    return {
+      startupId: s.id,
+      startupName: s.name,
+      founderName: s.user.fullName,
+      founderEmail: s.user.email,
+      phone: typeof meta.phone === 'string' ? meta.phone : '—',
+      bankName: typeof meta.bankName === 'string' ? meta.bankName : '—',
+      accountNumber: typeof meta.accountNumber === 'string' ? meta.accountNumber : '—',
+      accountHolder: typeof meta.accountHolder === 'string' ? meta.accountHolder : '—',
+      updatedAt: log?.createdAt ? toISO(log.createdAt) : null,
+      isActive: s.isActive,
+    }
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Approve / Reject Investor
 // ---------------------------------------------------------------------------

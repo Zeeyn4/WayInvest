@@ -14,6 +14,8 @@ import {
   simulateTariffPayment,
   uploadStartupProjectFile,
   createStartupInvestorReview,
+  getStartupRequisites,
+  saveStartupRequisites,
 } from '@/actions/startup.actions'
 import { addChatParticipant, getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
@@ -82,6 +84,14 @@ export default function StartupDashboard() {
   const [reviewText, setReviewText] = useState('')
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewBusy, setReviewBusy] = useState(false)
+  const [requisitesData, setRequisitesData] = useState({
+    phone: '',
+    bankName: '',
+    accountNumber: '',
+    accountHolder: '',
+    updatedAt: null as string | null,
+  })
+  const [requisitesBusy, setRequisitesBusy] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -126,13 +136,15 @@ export default function StartupDashboard() {
             break
           }
           case 'profile': {
-            const [profile, docs] = await Promise.all([
+            const [profile, docs, reqs] = await Promise.all([
               getStartupProfile(),
               documentsData ? Promise.resolve(documentsData) : getStartupDocuments(),
+              getStartupRequisites(),
             ])
             if (!cancelled) {
               setProfileData(profile)
               if (!documentsData) setDocumentsData(docs)
+              setRequisitesData(reqs)
             }
             break
           }
@@ -283,6 +295,24 @@ export default function StartupDashboard() {
     return `${digits.slice(0, 2)}/${digits.slice(2)}`
   }
 
+  const formatPhoneRu = (value: string) => {
+    const digits = value.replace(/\D/g, '')
+    const normalized = digits.startsWith('8')
+      ? `7${digits.slice(1)}`
+      : digits.startsWith('7')
+        ? digits
+        : `7${digits}`
+    const cut = normalized.slice(0, 11)
+    const rest = cut.slice(1)
+    if (!rest) return '+7'
+    if (rest.length <= 3) return `+7 (${rest}`
+    if (rest.length <= 6) return `+7 (${rest.slice(0, 3)}) ${rest.slice(3)}`
+    if (rest.length <= 8) return `+7 (${rest.slice(0, 3)}) ${rest.slice(3, 6)}-${rest.slice(6)}`
+    return `+7 (${rest.slice(0, 3)}) ${rest.slice(3, 6)}-${rest.slice(6, 8)}-${rest.slice(8, 10)}`
+  }
+
+  const formatCardMasked = (value: string) => value.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ').trim()
+
   const handleFakePayment = async () => {
     if (!paymentPlan) return
     const amount = Number(paymentAmount)
@@ -377,6 +407,25 @@ export default function StartupDashboard() {
       showToast('Не удалось отправить отзыв', '❌')
     } finally {
       setReviewBusy(false)
+    }
+  }
+
+  const handleSaveRequisites = async () => {
+    setRequisitesBusy(true)
+    try {
+      await saveStartupRequisites({
+        phone: requisitesData.phone,
+        bankName: requisitesData.bankName,
+        accountNumber: requisitesData.accountNumber,
+        accountHolder: requisitesData.accountHolder,
+      })
+      const reqs = await getStartupRequisites()
+      setRequisitesData(reqs)
+      showToast('Реквизиты сохранены', '✅')
+    } catch {
+      showToast('Не удалось сохранить реквизиты', '❌')
+    } finally {
+      setRequisitesBusy(false)
     }
   }
 
@@ -584,6 +633,54 @@ export default function StartupDashboard() {
                 </div>
 
                 <div>
+                  <div className="card" style={{ marginBottom: '20px' }}>
+                    <h3 style={{ marginBottom: '16px', fontSize: '1rem' }}>🏦 Реквизиты для получения инвестиций</h3>
+                    <div className="form-group">
+                      <label>Телефон</label>
+                      <input
+                        value={requisitesData.phone}
+                        onChange={(e) => setRequisitesData((s) => ({ ...s, phone: formatPhoneRu(e.target.value) }))}
+                        placeholder="+7 (900) 000-00-00"
+                        inputMode="tel"
+                        maxLength={18}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Банк</label>
+                      <input
+                        value={requisitesData.bankName}
+                        onChange={(e) => setRequisitesData((s) => ({ ...s, bankName: e.target.value }))}
+                        placeholder="Сбербанк / Т-Банк / ВТБ..."
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Номер карты / счёта</label>
+                      <input
+                        value={requisitesData.accountNumber}
+                        onChange={(e) => setRequisitesData((s) => ({ ...s, accountNumber: formatCardMasked(e.target.value) }))}
+                        placeholder="0000 0000 0000 0000"
+                        inputMode="numeric"
+                        maxLength={19}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>ФИО держателя счёта</label>
+                      <input
+                        value={requisitesData.accountHolder}
+                        onChange={(e) => setRequisitesData((s) => ({ ...s, accountHolder: e.target.value }))}
+                        placeholder="Иванов Иван Иванович"
+                      />
+                    </div>
+                    {requisitesData.updatedAt && (
+                      <div style={{ color: 'var(--text-dim)', fontSize: '.75rem', marginBottom: 10 }}>
+                        Обновлено: {new Date(requisitesData.updatedAt).toLocaleString('ru-RU')}
+                      </div>
+                    )}
+                    <button className="btn btn-gold btn-sm" style={{ width: '100%' }} onClick={handleSaveRequisites} disabled={requisitesBusy}>
+                      {requisitesBusy ? 'Сохранение...' : 'Сохранить реквизиты'}
+                    </button>
+                  </div>
+
                   <div className="card" style={{ marginBottom: '20px' }}>
                     <h3 style={{ marginBottom: '16px', fontSize: '1rem' }}>📎 Материалы проекта</h3>
                     {(documentsData?.files ?? []).length === 0 ? (
@@ -910,7 +1007,7 @@ export default function StartupDashboard() {
                 <strong>Комиссия платформы: 8%</strong> от суммы сделки взимается только при успешном закрытии инвестиционного раунда. Никаких скрытых платежей.
               </div>
               <div style={{ marginBottom: 20, color: 'var(--text-dim)', fontSize: '.9rem' }}>
-                Раздел подписки для стартапов: выберите пакет и оформите покупку. Оплата ниже работает как безопасная имитация с серверной фиксацией.
+                Раздел подписки для стартапов: выберите пакет и оформите покупку. После оплаты тариф активируется автоматически.
               </div>
 
               <div className="grid-4">
@@ -953,7 +1050,7 @@ export default function StartupDashboard() {
               <button className="modal-close" onClick={closePaymentScenario}>✕</button>
               <h2>Оплата тарифа: {paymentPlan.name}</h2>
               <p style={{ color: 'var(--text-dim)', marginBottom: 18 }}>
-                Фейковый сценарий оплаты: введите сумму и реквизиты карты, после чего тариф будет активирован в системе.
+                Введите сумму и реквизиты карты, после чего тариф будет активирован в системе.
               </p>
 
               {paymentSuccess ? (

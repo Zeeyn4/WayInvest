@@ -631,3 +631,73 @@ export async function createStartupInvestorReview(params: {
 
   return { ok: true }
 }
+
+// ---------------------------------------------------------------------------
+// Startup requisites (view/edit from startup cabinet)
+// ---------------------------------------------------------------------------
+
+export async function getStartupRequisites() {
+  const userId = await requireStartup()
+  const startup = await prisma.startup.findUnique({
+    where: { userId },
+    select: { id: true },
+  })
+  if (!startup) throw new Error('Startup not found')
+
+  const latest = await prisma.auditLog.findFirst({
+    where: {
+      action: 'STARTUP_REQUISITES_SAVED',
+      entity: 'startup',
+      entityId: startup.id,
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const meta = (latest?.meta ?? {}) as Record<string, unknown>
+  return {
+    phone: typeof meta.phone === 'string' ? meta.phone : '',
+    bankName: typeof meta.bankName === 'string' ? meta.bankName : '',
+    accountNumber: typeof meta.accountNumber === 'string' ? meta.accountNumber : '',
+    accountHolder: typeof meta.accountHolder === 'string' ? meta.accountHolder : '',
+    updatedAt: latest?.createdAt ? toISO(latest.createdAt) : null,
+  }
+}
+
+export async function saveStartupRequisites(params: {
+  phone: string
+  bankName: string
+  accountNumber: string
+  accountHolder: string
+}) {
+  const userId = await requireStartup()
+  const startup = await prisma.startup.findUnique({
+    where: { userId },
+    select: { id: true },
+  })
+  if (!startup) throw new Error('Startup not found')
+
+  const phone = params.phone.trim()
+  const bankName = params.bankName.trim()
+  const accountNumber = params.accountNumber.trim()
+  const accountHolder = params.accountHolder.trim()
+  if (!phone || !bankName || !accountNumber || !accountHolder) {
+    throw new Error('Заполните все реквизиты')
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      userId,
+      action: 'STARTUP_REQUISITES_SAVED',
+      entity: 'startup',
+      entityId: startup.id,
+      meta: {
+        phone,
+        bankName,
+        accountNumber,
+        accountHolder,
+      },
+    },
+  })
+
+  return { ok: true }
+}
