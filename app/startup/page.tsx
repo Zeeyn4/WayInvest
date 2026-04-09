@@ -61,6 +61,15 @@ export default function StartupDashboard() {
   // Tariff data
   const [tariffData, setTariffData] = useState<any>(null)
   const [tariffBuyBusySlug, setTariffBuyBusySlug] = useState<string | null>(null)
+  const [paymentPlan, setPaymentPlan] = useState<{ slug: string; name: string; price: number } | null>(null)
+  const [paymentAmount, setPaymentAmount] = useState('')
+  const [paymentCard, setPaymentCard] = useState('')
+  const [paymentHolder, setPaymentHolder] = useState('')
+  const [paymentExpiry, setPaymentExpiry] = useState('')
+  const [paymentCvv, setPaymentCvv] = useState('')
+  const [paymentBusy, setPaymentBusy] = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [paymentTxnId, setPaymentTxnId] = useState('')
 
   // NDA data
   const [ndaData, setNdaData] = useState<any[]>([])
@@ -234,6 +243,75 @@ export default function StartupDashboard() {
     }
   }
 
+  const openPaymentScenario = (plan: { slug: string; name: string; price: number }) => {
+    setPaymentPlan(plan)
+    setPaymentAmount(String(plan.price))
+    setPaymentCard('')
+    setPaymentHolder('')
+    setPaymentExpiry('')
+    setPaymentCvv('')
+    setPaymentSuccess(false)
+    setPaymentTxnId('')
+  }
+
+  const closePaymentScenario = () => {
+    if (paymentBusy) return
+    setPaymentPlan(null)
+    setPaymentSuccess(false)
+    setPaymentTxnId('')
+  }
+
+  const formatCardNumber = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 16)
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim()
+  }
+
+  const formatExpiry = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 4)
+    if (digits.length < 3) return digits
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  }
+
+  const handleFakePayment = async () => {
+    if (!paymentPlan) return
+    const amount = Number(paymentAmount)
+    const cardDigits = paymentCard.replace(/\D/g, '')
+    const cvvDigits = paymentCvv.replace(/\D/g, '')
+    if (!Number.isFinite(amount) || amount <= 0) {
+      showToast('Введите корректную сумму', '⚠️')
+      return
+    }
+    if (cardDigits.length < 16) {
+      showToast('Введите номер карты полностью', '⚠️')
+      return
+    }
+    if (!paymentHolder.trim()) {
+      showToast('Введите имя владельца карты', '⚠️')
+      return
+    }
+    if (!/^\d{2}\/\d{2}$/.test(paymentExpiry)) {
+      showToast('Срок карты в формате MM/YY', '⚠️')
+      return
+    }
+    if (cvvDigits.length < 3) {
+      showToast('Введите CVV', '⚠️')
+      return
+    }
+
+    setPaymentBusy(true)
+    try {
+      showToast('Проверяем реквизиты...', '💳')
+      await new Promise((resolve) => setTimeout(resolve, 900))
+      showToast('Списываем средства...', '⏳')
+      await new Promise((resolve) => setTimeout(resolve, 1200))
+      await buyTariff(paymentPlan.slug, paymentPlan.name)
+      setPaymentTxnId(`TXN-${Date.now().toString().slice(-8)}`)
+      setPaymentSuccess(true)
+    } finally {
+      setPaymentBusy(false)
+    }
+  }
+
   const uploadProjectDocument = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -302,7 +380,7 @@ export default function StartupDashboard() {
 
         <div className="sidebar-section">Настройки</div>
         <div className={`sidebar-item${activePanel === 'tariff' ? ' active' : ''}`} onClick={() => { setActivePanel('tariff'); setSidebarOpen(false) }}>
-          <span className="icon">💎</span> Тарифы и подписка
+          <span className="icon">💎</span> Тариф
         </div>
         <div className={`sidebar-item${activePanel === 'docs' ? ' active' : ''}`} onClick={() => { setActivePanel('docs'); setSidebarOpen(false) }}>
           <span className="icon">📄</span> Документы
@@ -785,8 +863,8 @@ export default function StartupDashboard() {
                         {tariffBuyBusySlug === plan.slug ? 'Подключение...' : 'Подключить'}
                       </button>
                     ) : (
-                      <button className="btn btn-gold btn-sm" style={{ width: '100%' }} onClick={() => buyTariff(plan.slug, plan.name)} disabled={tariffBuyBusySlug === plan.slug}>
-                        {tariffBuyBusySlug === plan.slug ? 'Оплата...' : 'Оплатить и подключить'}
+                      <button className="btn btn-gold btn-sm" style={{ width: '100%' }} onClick={() => openPaymentScenario({ slug: plan.slug, name: plan.name, price: plan.price })} disabled={tariffBuyBusySlug === plan.slug || paymentBusy}>
+                        Оплатить и подключить
                       </button>
                     )}
                   </div>
@@ -795,6 +873,114 @@ export default function StartupDashboard() {
             </>
           )}
         </div>
+
+        {/* Fake payment scenario modal */}
+        {paymentPlan && (
+          <div className="modal-overlay active" onClick={(e) => { if (e.target === e.currentTarget) closePaymentScenario() }}>
+            <div className="modal" style={{ maxWidth: 560 }}>
+              <button className="modal-close" onClick={closePaymentScenario}>✕</button>
+              <h2>Оплата тарифа: {paymentPlan.name}</h2>
+              <p style={{ color: 'var(--text-dim)', marginBottom: 18 }}>
+                Фейковый сценарий оплаты: введите сумму и реквизиты карты, после чего тариф будет активирован в системе.
+              </p>
+
+              {paymentSuccess ? (
+                <div style={{ textAlign: 'center', padding: '18px 6px 4px' }}>
+                  <div className="payment-success-check">✓</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 6 }}>Оплата прошла успешно</div>
+                  <div style={{ color: 'var(--text-dim)', marginBottom: 14 }}>Тариф <strong style={{ color: 'var(--gold)' }}>{paymentPlan.name}</strong> активирован</div>
+                  <div style={{ background: 'var(--dark3)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', fontSize: '.85rem', color: 'var(--text-dim)', marginBottom: 14 }}>
+                    ID операции: <span style={{ color: 'var(--gold)', fontFamily: 'monospace' }}>{paymentTxnId}</span>
+                  </div>
+                  <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} onClick={closePaymentScenario}>
+                    Готово
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Сумма (₽)</label>
+                    <input
+                      type="number"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      disabled={paymentBusy}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Номер карты</label>
+                    <input
+                      placeholder="0000 0000 0000 0000"
+                      value={paymentCard}
+                      onChange={(e) => setPaymentCard(formatCardNumber(e.target.value))}
+                      maxLength={19}
+                      inputMode="numeric"
+                      disabled={paymentBusy}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Владелец карты</label>
+                    <input
+                      placeholder="IVAN IVANOV"
+                      value={paymentHolder}
+                      onChange={(e) => setPaymentHolder(e.target.value.toUpperCase())}
+                      disabled={paymentBusy}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="form-group">
+                      <label>Срок (MM/YY)</label>
+                      <input
+                        placeholder="12/28"
+                        value={paymentExpiry}
+                        onChange={(e) => setPaymentExpiry(formatExpiry(e.target.value))}
+                        maxLength={5}
+                        inputMode="numeric"
+                        disabled={paymentBusy}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>CVV</label>
+                      <input
+                        placeholder="123"
+                        value={paymentCvv}
+                        onChange={(e) => setPaymentCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                        maxLength={3}
+                        inputMode="numeric"
+                        disabled={paymentBusy}
+                      />
+                    </div>
+                  </div>
+                  <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }} onClick={handleFakePayment} disabled={paymentBusy}>
+                    {paymentBusy ? 'Обработка платежа...' : 'Оплатить'}
+                  </button>
+                </>
+              )}
+              <style jsx>{`
+                .payment-success-check {
+                  width: 74px;
+                  height: 74px;
+                  margin: 0 auto 12px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 2rem;
+                  font-weight: 700;
+                  color: #0f5132;
+                  background: rgba(46, 204, 113, 0.22);
+                  border: 1px solid rgba(46, 204, 113, 0.45);
+                  animation: paySuccessPop 420ms ease-out;
+                }
+                @keyframes paySuccessPop {
+                  0% { transform: scale(0.7); opacity: 0; }
+                  70% { transform: scale(1.08); opacity: 1; }
+                  100% { transform: scale(1); opacity: 1; }
+                }
+              `}</style>
+            </div>
+          </div>
+        )}
 
         {/* ===== DOCS ===== */}
         <div className={`dash-panel${activePanel === 'docs' ? ' active' : ''}`}>
