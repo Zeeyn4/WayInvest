@@ -49,7 +49,6 @@ export default function Home() {
       <section className="hero">
         <div className="hero-bg"></div>
         <div className="hero-lines"></div>
-        <div className="hero-badge">🇷🇺 Первая инвест-платформа регионального рынка</div>
         <h1>Первая инвест-платформа<br />регионального рынка</h1>
         <p>LamInvest соединяет перспективные стартапы с верифицированными инвесторами. Безопасные сделки, AI-подбор партнёров, защита от мошенничества.</p>
         <div className="hero-btns">
