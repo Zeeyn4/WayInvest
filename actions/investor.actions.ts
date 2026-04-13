@@ -305,3 +305,79 @@ export async function getInvestorEvents() {
     createdAt: toISO(e.createdAt),
   }))
 }
+
+// ---------------------------------------------------------------------------
+// Investor bank card requisites
+// ---------------------------------------------------------------------------
+
+export async function getInvestorRequisites() {
+  const session = await auth()
+  if (!session?.user) throw new Error('Unauthorized')
+  const userId = session.user.id
+
+  const investor = await prisma.investor.findUnique({
+    where: { userId },
+    select: { id: true },
+  })
+  if (!investor) throw new Error('Investor not found')
+
+  const latest = await prisma.auditLog.findFirst({
+    where: {
+      action: 'INVESTOR_REQUISITES_SAVED',
+      entity: 'investor',
+      entityId: investor.id,
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const meta = (latest?.meta ?? {}) as Record<string, unknown>
+  return {
+    phone: typeof meta.phone === 'string' ? meta.phone : '',
+    bankName: typeof meta.bankName === 'string' ? meta.bankName : '',
+    cardNumber: typeof meta.cardNumber === 'string' ? meta.cardNumber : '',
+    cardHolder: typeof meta.cardHolder === 'string' ? meta.cardHolder : '',
+    updatedAt: latest?.createdAt ? toISO(latest.createdAt) : null,
+  }
+}
+
+export async function saveInvestorRequisites(params: {
+  phone: string
+  bankName: string
+  cardNumber: string
+  cardHolder: string
+}) {
+  const session = await auth()
+  if (!session?.user) throw new Error('Unauthorized')
+  const userId = session.user.id
+
+  const investor = await prisma.investor.findUnique({
+    where: { userId },
+    select: { id: true },
+  })
+  if (!investor) throw new Error('Investor not found')
+
+  const phone = params.phone.trim()
+  const bankName = params.bankName.trim()
+  const cardNumber = params.cardNumber.trim()
+  const cardHolder = params.cardHolder.trim()
+  if (!phone || !bankName || !cardNumber || !cardHolder) {
+    throw new Error('Заполните все реквизиты карты')
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      userId,
+      action: 'INVESTOR_REQUISITES_SAVED',
+      entity: 'investor',
+      entityId: investor.id,
+      meta: {
+        phone,
+        bankName,
+        cardNumber,
+        cardHolder,
+      },
+    },
+  })
+
+  return { ok: true }
+}

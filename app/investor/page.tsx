@@ -9,14 +9,17 @@ import {
   getStartupCatalog,
   getInvestorDeals,
   getInvestorEvents,
+  getInvestorRequisites,
+  saveInvestorRequisites,
 } from '@/actions/investor.actions'
 import { addChatParticipant, getChatList, getChatMessages, sendMessage, startChat } from '@/actions/chat.actions'
 
-type Panel = 'dashboard' | 'profile' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'deals'
+type Panel = 'dashboard' | 'profile' | 'bankCard' | 'aiMatch' | 'catalog' | 'chat' | 'events' | 'deals'
 
 const panelTitles: Record<Panel, string> = {
   dashboard: 'Дашборд',
   profile: 'Мой профиль',
+  bankCard: 'Банковская карта',
   aiMatch: 'AI-подбор стартапов',
   catalog: 'Каталог стартапов',
   chat: 'Чаты',
@@ -70,6 +73,22 @@ function initials(name: string): string {
   return name.split(' ').map(w => w[0]).join('').slice(0, 2)
 }
 
+function formatPhoneRu(value: string) {
+  const digits = value.replace(/\D/g, '').replace(/^8/, '7').slice(0, 11)
+  const d = digits.startsWith('7') ? digits.slice(1) : digits
+  let out = '+7'
+  if (d.length > 0) out += ` (${d.slice(0, 3)}`
+  if (d.length >= 3) out += ')'
+  if (d.length > 3) out += ` ${d.slice(3, 6)}`
+  if (d.length > 6) out += `-${d.slice(6, 8)}`
+  if (d.length > 8) out += `-${d.slice(8, 10)}`
+  return out
+}
+
+function formatCardMasked(value: string) {
+  return value.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ').trim()
+}
+
 // --- component ---------------------------------------------------------------
 
 interface ChatMessage {
@@ -109,6 +128,15 @@ export default function InvestorPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const [chatParticipantEmail, setChatParticipantEmail] = useState('')
   const [chatParticipantBusy, setChatParticipantBusy] = useState(false)
+  const [cardRequisites, setCardRequisites] = useState({
+    phone: '',
+    bankName: '',
+    cardNumber: '',
+    cardHolder: '',
+    updatedAt: null as string | null,
+  })
+  const [cardRequisitesLoaded, setCardRequisitesLoaded] = useState(false)
+  const [cardRequisitesBusy, setCardRequisitesBusy] = useState(false)
 
   const chatEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -155,6 +183,11 @@ export default function InvestorPage() {
       getChatList().then(list => {
         setChatList(list as any)
         if (list.length > 0) setActiveChatId((list[0] as any).chatId)
+      }).catch(() => {})
+    } else if (activePanel === 'bankCard' && !cardRequisitesLoaded) {
+      getInvestorRequisites().then((data) => {
+        setCardRequisites(data)
+        setCardRequisitesLoaded(true)
       }).catch(() => {})
     }
   }, [activePanel])
@@ -214,6 +247,24 @@ export default function InvestorPage() {
     }
   }
 
+  const handleSaveCardRequisites = async () => {
+    setCardRequisitesBusy(true)
+    try {
+      await saveInvestorRequisites({
+        phone: cardRequisites.phone,
+        bankName: cardRequisites.bankName,
+        cardNumber: cardRequisites.cardNumber,
+        cardHolder: cardRequisites.cardHolder,
+      })
+      setCardRequisites((prev) => ({ ...prev, updatedAt: new Date().toISOString() }))
+      showToast('Реквизиты карты сохранены', '✅')
+    } catch {
+      showToast('Не удалось сохранить реквизиты', '❌')
+    } finally {
+      setCardRequisitesBusy(false)
+    }
+  }
+
   return (
     <div className="dash-layout">
       {/* Sidebar */}
@@ -235,6 +286,12 @@ export default function InvestorPage() {
           onClick={() => { setActivePanel('profile'); setSidebarOpen(false) }}
         >
           <span className="icon">👤</span> Мой профиль
+        </div>
+        <div
+          className={`sidebar-item ${activePanel === 'bankCard' ? 'active' : ''}`}
+          onClick={() => { setActivePanel('bankCard'); setSidebarOpen(false) }}
+        >
+          <span className="icon">💳</span> Банковская карта
         </div>
         <div className="sidebar-section">Стартапы</div>
         <div
@@ -454,6 +511,66 @@ export default function InvestorPage() {
               </div>
             </>
           )}
+        </div>
+
+        {/* Bank Card Panel */}
+        <div className={`dash-panel ${activePanel === 'bankCard' ? 'active' : ''}`}>
+          <div className="grid-2">
+            <div className="card">
+              <h3 style={{ marginBottom: 20 }}>💳 Реквизиты банковской карты</h3>
+              <div className="form-group">
+                <label>Телефон</label>
+                <input
+                  value={cardRequisites.phone}
+                  onChange={(e) => setCardRequisites((prev) => ({ ...prev, phone: formatPhoneRu(e.target.value) }))}
+                  placeholder="+7 (900) 000-00-00"
+                  inputMode="tel"
+                  maxLength={18}
+                />
+              </div>
+              <div className="form-group">
+                <label>Банк</label>
+                <input
+                  value={cardRequisites.bankName}
+                  onChange={(e) => setCardRequisites((prev) => ({ ...prev, bankName: e.target.value }))}
+                  placeholder="Сбербанк / Т-Банк / ВТБ..."
+                />
+              </div>
+              <div className="form-group">
+                <label>Номер карты</label>
+                <input
+                  value={cardRequisites.cardNumber}
+                  onChange={(e) => setCardRequisites((prev) => ({ ...prev, cardNumber: formatCardMasked(e.target.value) }))}
+                  placeholder="0000 0000 0000 0000"
+                  inputMode="numeric"
+                  maxLength={19}
+                />
+              </div>
+              <div className="form-group">
+                <label>ФИО держателя карты</label>
+                <input
+                  value={cardRequisites.cardHolder}
+                  onChange={(e) => setCardRequisites((prev) => ({ ...prev, cardHolder: e.target.value }))}
+                  placeholder="Иванов Иван Иванович"
+                />
+              </div>
+              {cardRequisites.updatedAt && (
+                <div style={{ color: 'var(--text-dim)', fontSize: '.75rem', marginBottom: 10 }}>
+                  Обновлено: {new Date(cardRequisites.updatedAt).toLocaleString('ru-RU')}
+                </div>
+              )}
+              <button className="btn btn-gold" onClick={handleSaveCardRequisites} disabled={cardRequisitesBusy}>
+                {cardRequisitesBusy ? 'Сохранение...' : 'Сохранить реквизиты'}
+              </button>
+            </div>
+            <div className="card">
+              <h3 style={{ marginBottom: 20 }}>Безопасность</h3>
+              <p className="text-dim" style={{ lineHeight: 1.7 }}>
+                Реквизиты используются для отображения платежной информации в рамках платформы.
+                Проверьте корректность номера карты и ФИО держателя перед сохранением.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* AI Match Panel */}
