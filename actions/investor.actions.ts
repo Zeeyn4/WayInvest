@@ -336,6 +336,7 @@ export async function getInvestorRequisites() {
     bankName: typeof meta.bankName === 'string' ? meta.bankName : '',
     cardNumber: typeof meta.cardNumber === 'string' ? meta.cardNumber : '',
     cardHolder: typeof meta.cardHolder === 'string' ? meta.cardHolder : '',
+    cardExpiry: typeof meta.cardExpiry === 'string' ? meta.cardExpiry : '',
     updatedAt: latest?.createdAt ? toISO(latest.createdAt) : null,
   }
 }
@@ -345,6 +346,7 @@ export async function saveInvestorRequisites(params: {
   bankName: string
   cardNumber: string
   cardHolder: string
+  cardExpiry: string
 }) {
   const session = await auth()
   if (!session?.user) throw new Error('Unauthorized')
@@ -360,7 +362,8 @@ export async function saveInvestorRequisites(params: {
   const bankName = params.bankName.trim()
   const cardNumber = params.cardNumber.trim()
   const cardHolder = params.cardHolder.trim()
-  if (!phone || !bankName || !cardNumber || !cardHolder) {
+  const cardExpiry = params.cardExpiry.trim()
+  if (!phone || !bankName || !cardNumber || !cardHolder || !cardExpiry) {
     throw new Error('Заполните все реквизиты карты')
   }
 
@@ -375,6 +378,7 @@ export async function saveInvestorRequisites(params: {
         bankName,
         cardNumber,
         cardHolder,
+        cardExpiry,
       },
     },
   })

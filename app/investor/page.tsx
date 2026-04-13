@@ -89,6 +89,12 @@ function formatCardMasked(value: string) {
   return value.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ').trim()
 }
 
+function formatCardExpiry(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 4)
+  if (digits.length <= 2) return digits
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`
+}
+
 // --- component ---------------------------------------------------------------
 
 interface ChatMessage {
@@ -133,6 +139,7 @@ export default function InvestorPage() {
     bankName: '',
     cardNumber: '',
     cardHolder: '',
+    cardExpiry: '',
     updatedAt: null as string | null,
   })
   const [cardRequisitesLoaded, setCardRequisitesLoaded] = useState(false)
@@ -228,6 +235,10 @@ export default function InvestorPage() {
 
   const activeChat = chatList.find(c => c.chatId === activeChatId)
   const activeChatName = activeChat ? (activeChat.chatName || activeChat.partnerName) : ''
+  const cardNumberPreview = cardRequisites.cardNumber || '0000 0000 0000 0000'
+  const cardHolderPreview = cardRequisites.cardHolder || 'IVAN IVANOV'
+  const cardExpiryPreview = cardRequisites.cardExpiry || 'MM/YY'
+  const cardBankPreview = cardRequisites.bankName || 'Ваш банк'
 
   const handleAddChatParticipant = async () => {
     if (!activeChatId || !chatParticipantEmail.trim()) return
@@ -255,6 +266,7 @@ export default function InvestorPage() {
         bankName: cardRequisites.bankName,
         cardNumber: cardRequisites.cardNumber,
         cardHolder: cardRequisites.cardHolder,
+        cardExpiry: cardRequisites.cardExpiry,
       })
       setCardRequisites((prev) => ({ ...prev, updatedAt: new Date().toISOString() }))
       showToast('Реквизиты карты сохранены', '✅')
@@ -518,6 +530,44 @@ export default function InvestorPage() {
           <div className="grid-2">
             <div className="card">
               <h3 style={{ marginBottom: 20 }}>💳 Реквизиты банковской карты</h3>
+              <div
+                style={{
+                  marginBottom: 18,
+                  borderRadius: 16,
+                  padding: 18,
+                  background: 'linear-gradient(135deg, #2B3E73 0%, #1F2B4D 45%, #C89B3C 100%)',
+                  border: '1px solid rgba(255,255,255,.16)',
+                  boxShadow: '0 16px 30px rgba(0,0,0,.35)',
+                  minHeight: 190,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(255,255,255,.9)' }}>
+                  <span style={{ fontSize: '.78rem', letterSpacing: '.08em', textTransform: 'uppercase' }}>{cardBankPreview}</span>
+                  <span style={{ fontSize: '1.2rem' }}>💳</span>
+                </div>
+                <div style={{ color: '#fff', fontSize: '1.15rem', letterSpacing: '.12em', fontWeight: 600 }}>
+                  {cardNumberPreview}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ color: 'rgba(255,255,255,.72)', fontSize: '.62rem', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                      Card Holder
+                    </div>
+                    <div style={{ color: '#fff', fontSize: '.84rem', letterSpacing: '.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {cardHolderPreview.toUpperCase()}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'rgba(255,255,255,.72)', fontSize: '.62rem', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                      Expires
+                    </div>
+                    <div style={{ color: '#fff', fontSize: '.9rem', letterSpacing: '.04em' }}>{cardExpiryPreview}</div>
+                  </div>
+                </div>
+              </div>
               <div className="form-group">
                 <label>Телефон</label>
                 <input
@@ -547,6 +597,16 @@ export default function InvestorPage() {
                 />
               </div>
               <div className="form-group">
+                <label>Срок действия</label>
+                <input
+                  value={cardRequisites.cardExpiry}
+                  onChange={(e) => setCardRequisites((prev) => ({ ...prev, cardExpiry: formatCardExpiry(e.target.value) }))}
+                  placeholder="MM/YY"
+                  inputMode="numeric"
+                  maxLength={5}
+                />
+              </div>
+              <div className="form-group">
                 <label>ФИО держателя карты</label>
                 <input
                   value={cardRequisites.cardHolder}
@@ -564,10 +624,10 @@ export default function InvestorPage() {
               </button>
             </div>
             <div className="card">
-              <h3 style={{ marginBottom: 20 }}>Безопасность</h3>
+              <h3 style={{ marginBottom: 20 }}>Подсказка</h3>
               <p className="text-dim" style={{ lineHeight: 1.7 }}>
-                Реквизиты используются для отображения платежной информации в рамках платформы.
-                Проверьте корректность номера карты и ФИО держателя перед сохранением.
+                Данные в форме сразу отображаются на карте сверху: можно проверить как будут выглядеть реквизиты
+                перед сохранением. Номер карты автоматически форматируется в читаемый вид.
               </p>
             </div>
           </div>
