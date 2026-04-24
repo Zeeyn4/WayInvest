@@ -299,7 +299,7 @@ export default function Home() {
           </div>
           <div className="footer-col">
             <h4>Поддержка</h4>
-            <a>support@wayinvest.ru</a>
+            <a>support@laminvest.ru</a>
             <a>+7 (928) 000-00-00</a>
             <a>Telegram-чат</a>
             <a>FAQ</a>
