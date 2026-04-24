@@ -146,7 +146,7 @@ export default function AdminPage() {
       {sidebarOpen && <div className="sidebar-overlay active" onClick={() => setSidebarOpen(false)} />}
       <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
         <div className="sidebar-logo" onClick={() => router.push('/')}>
-          Way<span>Invest</span>
+          Lam<span>Invest</span>
         </div>
 
         <div style={{ padding: '16px 24px' }}>

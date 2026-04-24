@@ -486,7 +486,7 @@ function DocsViewerModal() {
         {docTab === 'pitchdeck' && (
           <div style={{ padding: 28, maxHeight: '65vh', overflowY: 'auto' }}>
             <div style={{ position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', userSelect: 'none', transform: 'rotate(-25deg)', fontSize: '3.5rem', fontWeight: 900, color: 'rgba(201,168,76,.055)', fontFamily: "'Playfair Display',serif", letterSpacing: 6, whiteSpace: 'nowrap', zIndex: 10 }}>WAYINVEST РУСТАМ Б.</div>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', userSelect: 'none', transform: 'rotate(-25deg)', fontSize: '3.5rem', fontWeight: 900, color: 'rgba(201,168,76,.055)', fontFamily: "'Playfair Display',serif", letterSpacing: 6, whiteSpace: 'nowrap', zIndex: 10 }}>LAMINVEST РУСТАМ Б.</div>
               {/* Slide 1 */}
               <div style={{ background: '#111318', border: '1px solid rgba(201,168,76,.2)', borderRadius: 12, padding: 32, marginBottom: 16, minHeight: 220, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
                 <div style={{ fontSize: '.72rem', color: '#8A8680', position: 'absolute', top: 12, right: 16 }}>Слайд 1 / 10</div>
@@ -544,7 +544,7 @@ function DocsViewerModal() {
         {docTab === 'finance' && (
           <div style={{ padding: 28, maxHeight: '65vh', overflowY: 'auto' }}>
             <div style={{ position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', userSelect: 'none', transform: 'rotate(-25deg)', fontSize: '3.5rem', fontWeight: 900, color: 'rgba(201,168,76,.055)', fontFamily: "'Playfair Display',serif", letterSpacing: 6, whiteSpace: 'nowrap', zIndex: 10 }}>WAYINVEST РУСТАМ Б.</div>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', userSelect: 'none', transform: 'rotate(-25deg)', fontSize: '3.5rem', fontWeight: 900, color: 'rgba(201,168,76,.055)', fontFamily: "'Playfair Display',serif", letterSpacing: 6, whiteSpace: 'nowrap', zIndex: 10 }}>LAMINVEST РУСТАМ Б.</div>
               {/* Revenue table */}
               <div style={{ background: '#111318', border: '1px solid rgba(201,168,76,.2)', borderRadius: 12, padding: 24, marginBottom: 16 }}>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.2rem', color: '#C9A84C', marginBottom: 18 }}>📊 Выручка и рост (₽)</div>
@@ -881,7 +881,7 @@ function StartupDetailModal() {
         Платформа для прямых продаж сельскохозяйственной продукции фермерами конечным потребителям. 340 фермеров, 12 000 покупателей в ЧР.
       </p>
       <div className="watermarked" style={{ background: 'var(--dark3)', borderRadius: 10, padding: 20, marginBottom: 16 }}>
-        <div className="watermark-text">WAYINVEST NDA</div>
+        <div className="watermark-text">LAMINVEST NDA</div>
         <div style={{ fontSize: '.82rem', color: 'var(--text-dim)', position: 'relative', zIndex: 1 }}>📊 Детальные финансовые показатели и питч-дек доступны после подписания NDA</div>
       </div>
       <div style={{ display: 'flex', gap: 12 }}>
