@@ -439,7 +439,7 @@ export default function StartupDashboard() {
       {/* Sidebar */}
       {sidebarOpen && <div className="sidebar-overlay active" onClick={() => setSidebarOpen(false)} />}
       <div className={`sidebar${sidebarOpen ? ' open' : ''}`}>
-        <div className="sidebar-logo" onClick={() => router.push('/')}>Way<span>Invest</span></div>
+        <div className="sidebar-logo" onClick={() => router.push('/')}>Lam<span>Invest</span></div>
 
         <div className="sidebar-section">Основное</div>
         <div className={`sidebar-item${activePanel === 'dashboard' ? ' active' : ''}`} onClick={() => { setActivePanel('dashboard'); setSidebarOpen(false) }}>
